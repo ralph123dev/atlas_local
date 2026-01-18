@@ -1,9 +1,9 @@
-
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
-import { OnboardingDots } from '../components/OnboardingDots';
-import { OnboardingButton } from '../components/OnboardingButton';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { NavigationContext } from '../App';
+import LandLayerLocation from '../assets/images/land-layer-location.svg';
+import MapMarker from '../assets/images/map-marker.svg';
+import { OnboardingDots } from '../components/OnboardingDots';
 
 export default function LocationScreen() {
   const router = useContext(NavigationContext);
@@ -13,7 +13,7 @@ export default function LocationScreen() {
       <View style={styles.content}>
         <View style={styles.locationIconContainer}>
           <View style={styles.circle}>
-             <Text style={styles.pin}>📍</Text>
+             <MapMarker width={40} height={40} fill="#fff" />
           </View>
           <View style={styles.stem} />
         </View>
@@ -27,11 +27,15 @@ export default function LocationScreen() {
       <View style={styles.footer}>
         <OnboardingDots total={3} current={2} />
         <View style={styles.buttonContainer}>
-          <OnboardingButton 
-            text="Activer la localisation" 
-            onPress={() => alert('Localisation activée')} 
-            icon="location"
-          />
+          <TouchableOpacity 
+            style={styles.customButton}
+            onPress={() => alert('Localisation activée')}
+          >
+            <View style={styles.buttonInner}>
+              <LandLayerLocation width={20} height={20} fill="#fff" />
+              <Text style={styles.buttonText}>Activer la localisation</Text>
+            </View>
+          </TouchableOpacity>
           <TouchableOpacity 
             style={styles.secondaryButton}
             onPress={() => router.replace('/')}
@@ -100,6 +104,24 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: '100%',
     marginTop: 30,
+  },
+  customButton: {
+    backgroundColor: '#0057b7',
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  buttonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginLeft: 10,
   },
   secondaryButton: {
     alignItems: 'center',

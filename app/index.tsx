@@ -53,14 +53,13 @@ const styles = StyleSheet.create({
   logoBox: {
     width: 120,
     height: 120,
-    backgroundColor: '#f3f4f6',
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoImage: {
-    width: 80,
-    height: 80,
+    width: 120,
+    height: 280,
     resizeMode: 'contain',
   },
   logoText: {

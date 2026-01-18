@@ -1,6 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import HoldingHandDelivery from '../assets/images/holding-hand-delivery.svg';
+import Search from '../assets/images/search.svg';
+import SquareStar from '../assets/images/square-star.svg';
 import { OnboardingButton } from '../components/OnboardingButton';
 import { OnboardingDots } from '../components/OnboardingDots';
 
@@ -31,21 +34,21 @@ export default function IntroScreen() {
         <View style={styles.featuresContainer}>
           <View style={styles.feature}>
             <View style={styles.featureIcon}>
-              <Text style={styles.iconText}>🔍</Text>
+              <Search width={24} height={24} fill="#007bff" />
             </View>
             <Text style={styles.featureText}>Recherche instantanée</Text>
           </View>
           
           <View style={styles.feature}>
             <View style={styles.featureIcon}>
-              <Text style={styles.iconText}>📍</Text>
+              <HoldingHandDelivery width={24} height={24} fill="#28a745" />
             </View>
             <Text style={styles.featureText}>Services à proximité</Text>
           </View>
 
           <View style={styles.feature}>
             <View style={styles.featureIcon}>
-              <Text style={styles.iconText}>❤️</Text>
+              <SquareStar width={24} height={24} fill="#ffc107" />
             </View>
             <Text style={styles.featureText}>Enregistrez vos favoris</Text>
           </View>
