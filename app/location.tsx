@@ -1,10 +1,10 @@
+import * as Location from 'expo-location';
 import React, { useContext, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, Alert, Linking } from 'react-native';
+import { Alert, Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { NavigationContext } from '../App';
 import LandLayerLocation from '../assets/images/land-layer-location.svg';
 import MapMarker from '../assets/images/map-marker.svg';
 import { OnboardingDots } from '../components/OnboardingDots';
-import * as Location from 'expo-location';
 
 export default function LocationScreen() {
   const router = useContext(NavigationContext);
@@ -89,7 +89,7 @@ export default function LocationScreen() {
         [
           {
             text: 'Continuer',
-            onPress: () => router.replace('/'),
+            onPress: () => router.replace('/home'),
           },
         ]
       );
@@ -148,7 +148,7 @@ export default function LocationScreen() {
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.secondaryButton}
-            onPress={() => router.replace('/')}
+            onPress={() => router.replace('/home')}
           >
             <Text style={styles.secondaryButtonText}>Plus tard</Text>
           </TouchableOpacity>
