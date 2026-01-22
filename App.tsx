@@ -1,18 +1,15 @@
-import React, { createContext, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
+import HomeScreen from './app/home';
 import WelcomeScreen from './app/index';
 import IntroScreen from './app/intro';
 import LocationScreen from './app/location';
-
-export const NavigationContext = createContext({
-  push: (path: string) => {},
-  replace: (path: string) => {},
-});
+import { NavigationContext } from './app/NavigationContext';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState('/');
-  const paths = ['/', '/intro', '/location'];
+  const paths = ['/', '/intro', '/location', '/home'];
   const currentIndex = paths.indexOf(currentPath);
 
   const navigation = {
@@ -20,7 +17,7 @@ export default function App() {
     replace: (path: string) => setCurrentPath(path),
   };
 
-  const onHandlerStateChange = (event) => {
+  const onHandlerStateChange = (event: any) => {
     if (event.nativeEvent.state === State.END) {
       if (event.nativeEvent.translationX > 50) {
         // Swipe right: go to previous page
@@ -40,17 +37,21 @@ export default function App() {
         return <IntroScreen key="intro" />;
       case '/location':
         return <LocationScreen key="location" />;
+      case '/home':
+        return <HomeScreen key="home" />;
       default:
         return <WelcomeScreen key="welcome" />;
     }
   };
 
   return (
-    <NavigationContext.Provider value={navigation}>
-      <PanGestureHandler onHandlerStateChange={onHandlerStateChange}>
-        <View style={styles.container}>{renderContent()}</View>
-      </PanGestureHandler>
-    </NavigationContext.Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContext.Provider value={navigation}>
+        <PanGestureHandler onHandlerStateChange={onHandlerStateChange}>
+          <View style={styles.container}>{renderContent()}</View>
+        </PanGestureHandler>
+      </NavigationContext.Provider>
+    </GestureHandlerRootView>
   );
 }
 

@@ -1,10 +1,9 @@
 import * as Location from 'expo-location';
+import { MapPin, Navigation } from 'lucide-react-native';
 import React, { useContext, useState } from 'react';
 import { Alert, Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { NavigationContext } from '../App';
-import LandLayerLocation from '../assets/images/land-layer-location.svg';
-import MapMarker from '../assets/images/map-marker.svg';
 import { OnboardingDots } from '../components/OnboardingDots';
+import { NavigationContext } from './NavigationContext';
 
 export default function LocationScreen() {
   const router = useContext(NavigationContext);
@@ -17,15 +16,15 @@ export default function LocationScreen() {
     try {
       // Vérifier si les services de localisation sont activés
       const serviceEnabled = await Location.hasServicesEnabledAsync();
-      
+
       if (!serviceEnabled) {
         Alert.alert(
           'GPS désactivé',
           'Veuillez activer le GPS dans les paramètres de votre téléphone.',
           [
             { text: 'Annuler', onPress: () => setIsRequesting(false) },
-            { 
-              text: 'Paramètres', 
+            {
+              text: 'Paramètres',
               onPress: () => {
                 Linking.openSettings();
                 setIsRequesting(false);
@@ -48,8 +47,8 @@ export default function LocationScreen() {
           'Vous avez refusé l\'accès à la localisation. Vous pouvez l\'activer plus tard dans les paramètres.',
           [
             { text: 'OK', onPress: () => setIsRequesting(false) },
-            { 
-              text: 'Paramètres', 
+            {
+              text: 'Paramètres',
               onPress: () => {
                 Linking.openSettings();
                 setIsRequesting(false);
@@ -82,23 +81,15 @@ export default function LocationScreen() {
       });
 
       const { latitude, longitude } = location.coords;
-      
-      Alert.alert(
-        'Localisation activée ✓',
-        `Votre position a été détectée avec succès.\n\nLatitude: ${latitude.toFixed(4)}\nLongitude: ${longitude.toFixed(4)}`,
-        [
-          {
-            text: 'Continuer',
-            onPress: () => router.replace('/home'),
-          },
-        ]
-      );
+
+      // Redirection directe vers la page d'accueil
+      router.push('/home');
       setIsRequesting(false);
     } catch (error) {
       console.error('Erreur de géolocalisation:', error);
-      
+
       let message = 'Impossible d\'obtenir votre position.';
-      
+
       if (error.code === 'E_LOCATION_SERVICES_DISABLED') {
         message = 'Les services de localisation sont désactivés. Activez le GPS dans vos paramètres.';
       } else if (error.code === 'E_LOCATION_TIMEOUT') {
@@ -106,7 +97,7 @@ export default function LocationScreen() {
       } else if (error.code === 'E_LOCATION_UNAVAILABLE') {
         message = 'Position non disponible. Assurez-vous que le GPS est activé.';
       }
-      
+
       Alert.alert(
         'Erreur de localisation',
         message,
@@ -120,7 +111,7 @@ export default function LocationScreen() {
       <View style={styles.content}>
         <View style={styles.locationIconContainer}>
           <View style={styles.circle}>
-             <MapMarker width={40} height={40} fill="#fff" />
+            <MapPin size={40} color="#fff" />
           </View>
           <View style={styles.stem} />
         </View>
@@ -134,21 +125,21 @@ export default function LocationScreen() {
       <View style={styles.footer}>
         <OnboardingDots total={3} current={2} />
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.customButton, isRequesting && styles.buttonDisabled]}
             onPress={requestLocationPermission}
             disabled={isRequesting}
           >
             <View style={styles.buttonInner}>
-              <LandLayerLocation width={20} height={20} fill="#fff" />
+              <Navigation size={20} color="#fff" />
               <Text style={styles.buttonText}>
                 {isRequesting ? 'Activation...' : 'Activer la localisation'}
               </Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.secondaryButton}
-            onPress={() => router.replace('/home')}
+            onPress={() => router.push('/home')}
           >
             <Text style={styles.secondaryButtonText}>Plus tard</Text>
           </TouchableOpacity>

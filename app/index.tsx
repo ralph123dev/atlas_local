@@ -1,12 +1,12 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { OnboardingButton } from '../components/OnboardingButton';
 import { OnboardingDots } from '../components/OnboardingDots';
+import { NavigationContext } from './NavigationContext';
 
 export default function WelcomeScreen() {
-  const navigation = useNavigation();
-  
+  const router = useContext(NavigationContext);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -25,9 +25,9 @@ export default function WelcomeScreen() {
       <View style={styles.footer}>
         <OnboardingDots total={3} current={0} />
         <View style={styles.buttonContainer}>
-          <OnboardingButton 
-            text="Commencer" 
-            onPress={() => navigation.navigate('intro')} 
+          <OnboardingButton
+            text="Commencer"
+            onPress={() => router.push('/intro')}
             icon="arrow"
           />
         </View>

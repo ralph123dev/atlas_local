@@ -1,21 +1,19 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import { Package, Search, Star } from 'lucide-react-native';
+import React, { useContext } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import HoldingHandDelivery from '../assets/images/holding-hand-delivery.svg';
-import Search from '../assets/images/search.svg';
-import SquareStar from '../assets/images/square-star.svg';
 import { OnboardingButton } from '../components/OnboardingButton';
 import { OnboardingDots } from '../components/OnboardingDots';
+import { NavigationContext } from './NavigationContext';
 
 export default function IntroScreen() {
-  const navigation = useNavigation();
+  const router = useContext(NavigationContext);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.skipButton}
-          onPress={() => navigation.navigate('location')}
+          onPress={() => router.push('/location')}
         >
           <Text style={styles.skipText}>Passer</Text>
         </TouchableOpacity>
@@ -23,7 +21,7 @@ export default function IntroScreen() {
 
       <View style={styles.content}>
         <View style={styles.imageContainer}>
-           <Text style={styles.mapEmoji}>🗺️</Text>
+          <Text style={styles.mapEmoji}>🗺️</Text>
         </View>
 
         <Text style={styles.title}>Simple et pratique</Text>
@@ -34,21 +32,21 @@ export default function IntroScreen() {
         <View style={styles.featuresContainer}>
           <View style={styles.feature}>
             <View style={styles.featureIcon}>
-              <Search width={24} height={24} fill="#007bff" />
+              <Search size={24} color="#007bff" />
             </View>
             <Text style={styles.featureText}>Recherche instantanée</Text>
           </View>
-          
+
           <View style={styles.feature}>
             <View style={styles.featureIcon}>
-              <HoldingHandDelivery width={24} height={24} fill="#28a745" />
+              <Package size={24} color="#28a745" />
             </View>
             <Text style={styles.featureText}>Services à proximité</Text>
           </View>
 
           <View style={styles.feature}>
             <View style={styles.featureIcon}>
-              <SquareStar width={24} height={24} fill="#ffc107" />
+              <Star size={24} color="#ffc107" />
             </View>
             <Text style={styles.featureText}>Enregistrez vos favoris</Text>
           </View>
@@ -58,9 +56,9 @@ export default function IntroScreen() {
       <View style={styles.footer}>
         <OnboardingDots total={3} current={1} />
         <View style={styles.buttonContainer}>
-          <OnboardingButton 
-            text="Suivant" 
-            onPress={() => navigation.navigate('location')} 
+          <OnboardingButton
+            text="Suivant"
+            onPress={() => router.push('/location')}
             icon="arrow"
           />
         </View>
