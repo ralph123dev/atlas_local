@@ -1,8 +1,11 @@
 import { Calendar, CloudSun, HeartHandshake, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, User } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NavigationContext } from './NavigationContext';
 
 export default function HomeScreen() {
+  const router = useContext(NavigationContext);
   const [activeTab, setActiveTab] = useState('explorer');
 
   const renderContent = () => {
@@ -67,11 +70,11 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'ask' && styles.activeTab]}
-          onPress={() => setActiveTab('ask')}
+          style={styles.tab}
+          onPress={() => router.push('/ask')}
         >
-          <MessageCircleQuestion size={24} color={activeTab === 'ask' ? '#0057b7' : '#6b7280'} />
-          <Text style={[styles.tabText, activeTab === 'ask' && styles.activeTabText]}>Ask</Text>
+          <MessageCircleQuestion size={24} color="#6b7280" />
+          <Text style={styles.tabText}>Ask</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

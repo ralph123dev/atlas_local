@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
+import AskScreen from './app/ask';
 import HomeScreen from './app/home';
 import WelcomeScreen from './app/index';
 import IntroScreen from './app/intro';
@@ -9,7 +10,7 @@ import { NavigationContext } from './app/NavigationContext';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState('/');
-  const paths = ['/', '/intro', '/location', '/home'];
+  const paths = ['/', '/intro', '/location', '/home', '/ask'];
   const currentIndex = paths.indexOf(currentPath);
 
   const navigation = {
@@ -39,6 +40,8 @@ export default function App() {
         return <LocationScreen key="location" />;
       case '/home':
         return <HomeScreen key="home" />;
+      case '/ask':
+        return <AskScreen key="ask" />;
       default:
         return <WelcomeScreen key="welcome" />;
     }
