@@ -3,43 +3,63 @@ import React, { useContext, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContext } from './NavigationContext';
+import { ThemeContext } from './ThemeContext';
 
 export default function HomeScreen() {
   const router = useContext(NavigationContext);
+  const { theme } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState('explorer');
+
+  const isDark = theme === 'dark';
+  const isBlue = theme === 'blue';
+
+  const themeStyles = {
+    container: { backgroundColor: isDark ? '#1a1a1a' : '#fff' },
+    text: { color: isDark ? '#f3f4f6' : '#1a1a1a' },
+    subText: { color: isDark ? '#9ca3af' : '#6b7280' },
+    header: { backgroundColor: isDark ? '#1a1a1a' : '#fff', borderBottomColor: isDark ? '#374151' : '#f3f4f6' },
+    searchContainer: { backgroundColor: isDark ? '#374151' : '#f3f4f6' },
+    searchInput: { color: isDark ? '#f3f4f6' : '#1a1a1a' },
+    navBg: { backgroundColor: isDark ? '#1a1a1a' : '#fff', borderTopColor: isDark ? '#374151' : '#e5e7eb' },
+    activeTab: { backgroundColor: isDark ? '#374151' : '#f0f9ff' },
+    activeTabText: { color: isDark ? '#60a5fa' : '#0057b7' },
+    iconActive: isDark ? '#60a5fa' : '#0057b7',
+    iconInactive: isDark ? '#9ca3af' : '#6b7280',
+    iconPrimary: isDark ? '#f3f4f6' : '#1a1a1a',
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'explorer':
-        return <Text style={styles.contentText}>Contenu de l'onglet Explorer</Text>;
+        return <Text style={[styles.contentText, themeStyles.text]}>Contenu de l'onglet Explorer</Text>;
       case 'evenements':
-        return <Text style={styles.contentText}>Contenu de l'onglet Événements</Text>;
+        return <Text style={[styles.contentText, themeStyles.text]}>Contenu de l'onglet Événements</Text>;
       case 'ask':
-        return <Text style={styles.contentText}>Posez vos questions ici</Text>;
+        return <Text style={[styles.contentText, themeStyles.text]}>Posez vos questions ici</Text>;
       case 'contribute':
-        return <Text style={styles.contentText}>Contenu de l'onglet Contribute</Text>;
+        return <Text style={[styles.contentText, themeStyles.text]}>Contenu de l'onglet Contribute</Text>;
       default:
         return null;
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, themeStyles.container]}>
       {/* Header avec recherche */}
-      <View style={styles.header}>
-        <View style={styles.searchContainer}>
-          <Search size={20} color="#6b7280" style={styles.searchIcon} />
+      <View style={[styles.header, themeStyles.header]}>
+        <View style={[styles.searchContainer, themeStyles.searchContainer]}>
+          <Search size={20} color={themeStyles.iconInactive} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
-            placeholder="Rechercher..."
-            placeholderTextColor="#9ca3af"
+            style={[styles.searchInput, themeStyles.searchInput]}
+            placeholder="Rechercher un ser..."
+            placeholderTextColor={isDark || isBlue ? '#8899a6' : '#9ca3af'}
           />
         </View>
         <TouchableOpacity style={styles.iconButton}>
-          <Mic size={24} color="#1a1a1a" />
+          <Mic size={24} color={themeStyles.iconPrimary} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconButton}>
-          <User size={24} color="#1a1a1a" />
+          <User size={24} color={themeStyles.iconPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -52,37 +72,37 @@ export default function HomeScreen() {
         <CloudSun size={24} color="#fff" />
       </TouchableOpacity>
 
-      <View style={styles.bottomNav}>
+      <View style={[styles.bottomNav, themeStyles.navBg]}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'explorer' && styles.activeTab]}
+          style={[styles.tab, activeTab === 'explorer' && [styles.activeTab, themeStyles.activeTab]]}
           onPress={() => setActiveTab('explorer')}
         >
-          <MapLucideIcon size={24} color={activeTab === 'explorer' ? '#0057b7' : '#6b7280'} />
-          <Text style={[styles.tabText, activeTab === 'explorer' && styles.activeTabText]}>Explorer</Text>
+          <MapLucideIcon size={24} color={activeTab === 'explorer' ? themeStyles.iconActive : themeStyles.iconInactive} />
+          <Text style={[styles.tabText, themeStyles.subText, activeTab === 'explorer' && [styles.activeTabText, themeStyles.activeTabText]]}>Explorer</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'evenements' && styles.activeTab]}
+          style={[styles.tab, activeTab === 'evenements' && [styles.activeTab, themeStyles.activeTab]]}
           onPress={() => setActiveTab('evenements')}
         >
-          <Calendar size={24} color={activeTab === 'evenements' ? '#0057b7' : '#6b7280'} />
-          <Text style={[styles.tabText, activeTab === 'evenements' && styles.activeTabText]}>Événements</Text>
+          <Calendar size={24} color={activeTab === 'evenements' ? themeStyles.iconActive : themeStyles.iconInactive} />
+          <Text style={[styles.tabText, themeStyles.subText, activeTab === 'evenements' && [styles.activeTabText, themeStyles.activeTabText]]}>Événements</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.tab}
           onPress={() => router.push('/ask')}
         >
-          <MessageCircleQuestion size={24} color="#6b7280" />
-          <Text style={styles.tabText}>Ask</Text>
+          <MessageCircleQuestion size={24} color={themeStyles.iconInactive} />
+          <Text style={[styles.tabText, themeStyles.subText]}>Ask</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'contribute' && styles.activeTab]}
+          style={[styles.tab, activeTab === 'contribute' && [styles.activeTab, themeStyles.activeTab]]}
           onPress={() => setActiveTab('contribute')}
         >
-          <HeartHandshake size={24} color={activeTab === 'contribute' ? '#0057b7' : '#6b7280'} />
-          <Text style={[styles.tabText, activeTab === 'contribute' && styles.activeTabText]}>Contribute</Text>
+          <HeartHandshake size={24} color={activeTab === 'contribute' ? themeStyles.iconActive : themeStyles.iconInactive} />
+          <Text style={[styles.tabText, themeStyles.subText, activeTab === 'contribute' && [styles.activeTabText, themeStyles.activeTabText]]}>Contribute</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -102,7 +122,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#f3f4f6',
-    marginTop: 30,
+    marginTop: 18,
   },
   searchContainer: {
     flex: 1,
@@ -138,8 +158,8 @@ const styles = StyleSheet.create({
   },
   fabWeather: {
     position: 'absolute',
-    bottom: 80, // Juste au-dessus de la nav bar
-    right: 20,  // Aligné au-dessus du dernier onglet (Contribute)
+    bottom: 105, // Juste au-dessus de la nav bar
+    right: 20,
     backgroundColor: '#0057b7',
     width: 50,
     height: 50,
@@ -152,6 +172,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     zIndex: 10,
+
   },
   bottomNav: {
     flexDirection: 'row',

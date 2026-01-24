@@ -4,12 +4,23 @@ import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-na
 import { OnboardingButton } from '../components/OnboardingButton';
 import { OnboardingDots } from '../components/OnboardingDots';
 import { NavigationContext } from './NavigationContext';
+import { ThemeContext } from './ThemeContext';
 
 export default function IntroScreen() {
   const router = useContext(NavigationContext);
+  const { theme } = useContext(ThemeContext);
+
+  const isDark = theme === 'dark';
+  const isBlue = theme === 'blue';
+
+  const themeStyles = {
+    container: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff' },
+    text: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
+    subText: { color: isDark ? '#9ca3af' : isBlue ? '#8899a6' : '#6b7280' },
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, themeStyles.container]}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.skipButton}
@@ -24,8 +35,8 @@ export default function IntroScreen() {
           <Text style={styles.mapEmoji}>🗺️</Text>
         </View>
 
-        <Text style={styles.title}>Simple et pratique</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, themeStyles.text]}>Simple et pratique</Text>
+        <Text style={[styles.subtitle, themeStyles.subText]}>
           Trouvez ce dont vous avez besoin en un coup d'œil sur la carte
         </Text>
 
@@ -34,21 +45,21 @@ export default function IntroScreen() {
             <View style={styles.featureIcon}>
               <Search size={24} color="#007bff" />
             </View>
-            <Text style={styles.featureText}>Recherche instantanée</Text>
+            <Text style={[styles.featureText, themeStyles.text]}>Recherche instantanée</Text>
           </View>
 
           <View style={styles.feature}>
             <View style={styles.featureIcon}>
               <Package size={24} color="#28a745" />
             </View>
-            <Text style={styles.featureText}>Services à proximité</Text>
+            <Text style={[styles.featureText, themeStyles.text]}>Services à proximité</Text>
           </View>
 
           <View style={styles.feature}>
             <View style={styles.featureIcon}>
               <Star size={24} color="#ffc107" />
             </View>
-            <Text style={styles.featureText}>Enregistrez vos favoris</Text>
+            <Text style={[styles.featureText, themeStyles.text]}>Enregistrez vos favoris</Text>
           </View>
         </View>
       </View>

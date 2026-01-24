@@ -3,12 +3,23 @@ import { Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { OnboardingButton } from '../components/OnboardingButton';
 import { OnboardingDots } from '../components/OnboardingDots';
 import { NavigationContext } from './NavigationContext';
+import { ThemeContext } from './ThemeContext';
 
 export default function WelcomeScreen() {
   const router = useContext(NavigationContext);
+  const { theme } = useContext(ThemeContext);
+
+  const isDark = theme === 'dark';
+  const isBlue = theme === 'blue';
+
+  const themeStyles = {
+    container: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff' },
+    title: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
+    subtitle: { color: isDark ? '#9ca3af' : isBlue ? '#8899a6' : '#6b7280' },
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, themeStyles.container]}>
       <View style={styles.content}>
         <View style={styles.logoContainer}>
           <View style={styles.logoBox}>
@@ -16,8 +27,8 @@ export default function WelcomeScreen() {
           </View>
         </View>
 
-        <Text style={styles.title}>Bienvenue sur Atlas Local</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, themeStyles.title]}>Ravie de vous rencontrer ici</Text>
+        <Text style={[styles.subtitle, themeStyles.subtitle]}>
           Découvrez les services et événements à proximité dans la région Ottawa-Gatineau
         </Text>
       </View>

@@ -7,9 +7,12 @@ import WelcomeScreen from './app/index';
 import IntroScreen from './app/intro';
 import LocationScreen from './app/location';
 import { NavigationContext } from './app/NavigationContext';
+import { Theme, ThemeContext } from './app/ThemeContext';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState('/');
+  const [theme, setTheme] = useState<Theme>('light');
+
   const paths = ['/', '/intro', '/location', '/home', '/ask'];
   const currentIndex = paths.indexOf(currentPath);
 
@@ -49,11 +52,15 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContext.Provider value={navigation}>
-        <PanGestureHandler onHandlerStateChange={onHandlerStateChange}>
-          <View style={styles.container}>{renderContent()}</View>
-        </PanGestureHandler>
-      </NavigationContext.Provider>
+      <ThemeContext.Provider value={{ theme, setTheme }}>
+        <NavigationContext.Provider value={navigation}>
+          <PanGestureHandler onHandlerStateChange={onHandlerStateChange}>
+            <View style={[styles.container, { backgroundColor: theme === 'light' ? '#fff' : theme === 'blue' ? '#15202b' : '#1a1a1a' }]}>
+              {renderContent()}
+            </View>
+          </PanGestureHandler>
+        </NavigationContext.Provider>
+      </ThemeContext.Provider>
     </GestureHandlerRootView>
   );
 }
@@ -63,6 +70,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-    backgroundColor: '#fff',
+    // backgroundColor removed here to be dynamic
   },
 });
