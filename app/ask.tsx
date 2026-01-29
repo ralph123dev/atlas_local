@@ -1,3 +1,10 @@
+/**
+ * @Project: Atlas Local
+ * @Author: Ralph <ralphurgue@gmail.com>
+ * @Date: 2026-01-12
+ * @Last Modified: 2026-01-24
+ * @Description: Application mobile d'exploration.
+ */
 import { ArrowLeft, Check, Droplet, Map, MessageSquare, MessageSquarePlus, Mic, Moon, Palette, Send, Sun } from 'lucide-react-native';
 import React, { useContext, useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -377,10 +384,3 @@ const styles = StyleSheet.create({
 });
 
 
-/**
- * @Project: Atlas Local
- * @Author: Ralph <ralphurgue@gmail.com>
- * @Date: 2026-01-12
- * @Last Modified: 2026-01-24
- * @Description: Application mobile d'exploration.
- */

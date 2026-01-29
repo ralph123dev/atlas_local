@@ -2,18 +2,21 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
 import AskScreen from './app/ask';
+import EventsScreen from './app/events';
 import HomeScreen from './app/home';
 import WelcomeScreen from './app/index';
 import IntroScreen from './app/intro';
 import LocationScreen from './app/location';
 import { NavigationContext } from './app/NavigationContext';
 import { Theme, ThemeContext } from './app/ThemeContext';
+import TrendingScreen from './app/trending';
+import WeatherScreen from './app/weather';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState('/');
   const [theme, setTheme] = useState<Theme>('light');
 
-  const paths = ['/', '/intro', '/location', '/home', '/ask'];
+  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/trending'];
   const currentIndex = paths.indexOf(currentPath);
 
   const navigation = {
@@ -45,6 +48,12 @@ export default function App() {
         return <HomeScreen key="home" />;
       case '/ask':
         return <AskScreen key="ask" />;
+      case '/weather':
+        return <WeatherScreen key="weather" />;
+      case '/events':
+        return <EventsScreen key="events" />;
+      case '/trending':
+        return <TrendingScreen key="trending" />;
       default:
         return <WelcomeScreen key="welcome" />;
     }

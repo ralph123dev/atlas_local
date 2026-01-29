@@ -1,7 +1,18 @@
-import { Calendar, CloudSun, HeartHandshake, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, User } from 'lucide-react-native';
+/**
+ * @Project: Atlas Local
+ * @Author: Ralph <ralphurgue@gmail.com>
+ * @Date: 2026-01-12
+ * @Last Modified: 2026-01-24
+ * @Description: Application mobile d'exploration.
+ */
+import { HeartHandshake, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, User } from 'lucide-react-native';
 import React, { useContext, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
+import { SideMenu } from '../components/SideMenu';
+import { TrendingPanel } from '../components/TrendingPanel';
 import { NavigationContext } from './NavigationContext';
 import { ThemeContext } from './ThemeContext';
 
@@ -9,6 +20,8 @@ export default function HomeScreen() {
   const router = useContext(NavigationContext);
   const { theme } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState('explorer');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMapLoading, setIsMapLoading] = useState(true);
 
   const isDark = theme === 'dark';
   const isBlue = theme === 'blue';
@@ -31,9 +44,22 @@ export default function HomeScreen() {
   const renderContent = () => {
     switch (activeTab) {
       case 'explorer':
-        return <Text style={[styles.contentText, themeStyles.text]}>Contenu de l'onglet Explorer</Text>;
-      case 'evenements':
-        return <Text style={[styles.contentText, themeStyles.text]}>Contenu de l'onglet Événements</Text>;
+        return (
+          <View style={{ flex: 1, width: '100%' }}>
+            {isMapLoading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={themeStyles.iconActive} />
+                <Text style={[styles.loadingText, themeStyles.text]}>Chargement de la carte...</Text>
+              </View>
+            )}
+            <WebView
+              source={{ uri: 'https://www.bing.com/maps?&cp=5.452391~10.0683&lvl=11&v=2&sV=1&mepi=59~~Embedded~LargeMapLink&FORM=MIRE' }}
+              style={{ flex: 1 }}
+              onLoadStart={() => setIsMapLoading(true)}
+              onLoadEnd={() => setIsMapLoading(false)}
+            />
+          </View>
+        );
       case 'ask':
         return <Text style={[styles.contentText, themeStyles.text]}>Posez vos questions ici</Text>;
       case 'contribute':
@@ -44,68 +70,75 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, themeStyles.container]}>
-      {/* Header avec recherche */}
-      <View style={[styles.header, themeStyles.header]}>
-        <View style={[styles.searchContainer, themeStyles.searchContainer]}>
-          <Search size={20} color={themeStyles.iconInactive} style={styles.searchIcon} />
-          <TextInput
-            style={[styles.searchInput, themeStyles.searchInput]}
-            placeholder="Rechercher un ser..."
-            placeholderTextColor={isDark || isBlue ? '#8899a6' : '#9ca3af'}
-          />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={[styles.container, themeStyles.container]}>
+        <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+
+        {/* Header avec recherche */}
+        <View style={[styles.header, themeStyles.header]}>
+          <View style={[styles.searchContainer, themeStyles.searchContainer]}>
+            <Search size={20} color={themeStyles.iconInactive} style={styles.searchIcon} />
+            <TextInput
+              style={[styles.searchInput, themeStyles.searchInput]}
+              placeholder="Rechercher un ser..."
+              placeholderTextColor={isDark || isBlue ? '#8899a6' : '#9ca3af'}
+            />
+          </View>
+          <TouchableOpacity style={styles.iconButton}>
+            <Mic size={24} color={themeStyles.iconPrimary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
+            <User size={24} color={themeStyles.iconPrimary} />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.iconButton}>
-          <Mic size={24} color={themeStyles.iconPrimary} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
-          <User size={24} color={themeStyles.iconPrimary} />
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.content}>
-        {renderContent()}
-      </View>
+        <View style={styles.content}>
+          {renderContent()}
+        </View>
 
-      {/* FAB Météo */}
-      <TouchableOpacity style={styles.fabWeather}>
-        <CloudSun size={24} color="#fff" />
-      </TouchableOpacity>
 
-      <View style={[styles.bottomNav, themeStyles.navBg]}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'explorer' && [styles.activeTab, themeStyles.activeTab]]}
-          onPress={() => setActiveTab('explorer')}
-        >
-          <MapLucideIcon size={24} color={activeTab === 'explorer' ? themeStyles.iconActive : themeStyles.iconInactive} />
-          <Text style={[styles.tabText, themeStyles.subText, activeTab === 'explorer' && [styles.activeTabText, themeStyles.activeTabText]]}>Explorer</Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'evenements' && [styles.activeTab, themeStyles.activeTab]]}
-          onPress={() => setActiveTab('evenements')}
-        >
-          <Calendar size={24} color={activeTab === 'evenements' ? themeStyles.iconActive : themeStyles.iconInactive} />
-          <Text style={[styles.tabText, themeStyles.subText, activeTab === 'evenements' && [styles.activeTabText, themeStyles.activeTabText]]}>Événements</Text>
-        </TouchableOpacity>
+        <View style={[styles.bottomNav, themeStyles.navBg]}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'explorer' && [styles.activeTab, themeStyles.activeTab]]}
+            onPress={() => setActiveTab('explorer')}
+          >
+            <MapLucideIcon size={24} color={activeTab === 'explorer' ? themeStyles.iconActive : themeStyles.iconInactive} />
+            <Text style={[styles.tabText, themeStyles.subText, activeTab === 'explorer' && [styles.activeTabText, themeStyles.activeTabText]]}>Explorer</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.tab}
-          onPress={() => router.push('/ask')}
-        >
-          <MessageCircleQuestion size={24} color={themeStyles.iconInactive} />
-          <Text style={[styles.tabText, themeStyles.subText]}>Ask</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'menu' && [styles.activeTab, themeStyles.activeTab]]}
+            onPress={() => setIsMenuOpen(true)}
+          >
+            <Image
+              source={require('../assets/images/more.png')}
+              style={[styles.menuIcon, { tintColor: activeTab === 'menu' ? themeStyles.iconActive : themeStyles.iconInactive }]}
+            />
+            <Text style={[styles.tabText, themeStyles.subText, activeTab === 'menu' && [styles.activeTabText, themeStyles.activeTabText]]}>Menu</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'contribute' && [styles.activeTab, themeStyles.activeTab]]}
-          onPress={() => setActiveTab('contribute')}
-        >
-          <HeartHandshake size={24} color={activeTab === 'contribute' ? themeStyles.iconActive : themeStyles.iconInactive} />
-          <Text style={[styles.tabText, themeStyles.subText, activeTab === 'contribute' && [styles.activeTabText, themeStyles.activeTabText]]}>Contribute</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => router.push('/ask')}
+          >
+            <MessageCircleQuestion size={24} color={themeStyles.iconInactive} />
+            <Text style={[styles.tabText, themeStyles.subText]}>Ask</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'contribute' && [styles.activeTab, themeStyles.activeTab]]}
+            onPress={() => setActiveTab('contribute')}
+          >
+            <HeartHandshake size={24} color={activeTab === 'contribute' ? themeStyles.iconActive : themeStyles.iconInactive} />
+            <Text style={[styles.tabText, themeStyles.subText, activeTab === 'contribute' && [styles.activeTabText, themeStyles.activeTabText]]}>Contribute</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Trending Panel Overlay */}
+        {activeTab === 'explorer' && <TrendingPanel />}
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -200,6 +233,25 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: '#0057b7',
     fontWeight: '600',
+  },
+  menuIcon: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
   },
 });
 
