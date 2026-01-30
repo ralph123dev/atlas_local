@@ -87,7 +87,7 @@ export default function HomeScreen() {
           <TouchableOpacity style={styles.iconButton}>
             <Mic size={24} color={themeStyles.iconPrimary} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/auth')}>
             <User size={24} color={themeStyles.iconPrimary} />
           </TouchableOpacity>
         </View>

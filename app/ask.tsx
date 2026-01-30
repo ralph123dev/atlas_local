@@ -2,15 +2,27 @@
  * @Project: Atlas Local
  * @Author: Ralph <ralphurgue@gmail.com>
  * @Date: 2026-01-12
- * @Last Modified: 2026-01-24
- * @Description: Application mobile d'exploration.
+ * @Last Modified: 2026-01-29
+ * @Description: Application mobile d'exploration - Interface de chat.
  */
-import { ArrowLeft, Check, Droplet, Map, MessageSquare, MessageSquarePlus, Mic, Moon, Palette, Send, Sun } from 'lucide-react-native';
-import React, { useContext, useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ArrowLeft, Check, Droplet, Edit2, FileText, Image as ImageIcon, Map, MessageSquare, MessageSquarePlus, Mic, Moon, Palette, Paperclip, Send, Sun, Trash2, Video, X } from 'lucide-react-native';
+import React, { useContext, useRef, useState } from 'react';
+import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContext } from './NavigationContext';
 import { ThemeContext } from './ThemeContext';
+
+interface Message {
+    id: string;
+    text: string;
+    timestamp: Date;
+    isUser: boolean;
+    attachments?: {
+        type: 'image' | 'video' | 'document' | 'audio';
+        name: string;
+        uri?: string;
+    }[];
+}
 
 export default function AskScreen() {
     const router = useContext(NavigationContext);
@@ -18,6 +30,12 @@ export default function AskScreen() {
     const [activeTab, setActiveTab] = useState('conversations');
     const [isThemeMenuVisible, setIsThemeMenuVisible] = useState(false);
     const [messageText, setMessageText] = useState('');
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [isRecording, setIsRecording] = useState(false);
+    const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+    const [isAttachmentMenuVisible, setIsAttachmentMenuVisible] = useState(false);
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const isDark = theme === 'dark';
     const isBlue = theme === 'blue';
@@ -36,6 +54,10 @@ export default function AskScreen() {
         inputBg: isDark ? '#374151' : isBlue ? '#273340' : '#f3f4f6',
         inputText: isDark || isBlue ? '#f3f4f6' : '#1a1a1a',
         divider: { backgroundColor: isDark ? '#374151' : isBlue ? '#38444d' : '#f3f4f6' },
+        messageBubbleUser: { backgroundColor: isDark ? '#0057b7' : isBlue ? '#1d9bf0' : '#0057b7' },
+        messageBubbleBot: { backgroundColor: isDark ? '#374151' : isBlue ? '#273340' : '#f3f4f6' },
+        messageTextUser: { color: '#fff' },
+        messageTextBot: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
     };
 
     const handleBack = () => {
@@ -55,11 +77,123 @@ export default function AskScreen() {
         setIsThemeMenuVisible(false);
     };
 
+    const handleSendMessage = () => {
+        if (messageText.trim().length === 0) return;
+
+        if (editingMessageId) {
+            // Modifier le message existant
+            setMessages(messages.map(msg =>
+                msg.id === editingMessageId
+                    ? { ...msg, text: messageText.trim() }
+                    : msg
+            ));
+            setEditingMessageId(null);
+        } else {
+            // Créer un nouveau message
+            const newMessage: Message = {
+                id: Date.now().toString(),
+                text: messageText.trim(),
+                timestamp: new Date(),
+                isUser: true,
+            };
+            setMessages([...messages, newMessage]);
+
+            // Simuler une réponse du bot après 1 seconde
+            setTimeout(() => {
+                const botResponse: Message = {
+                    id: (Date.now() + 1).toString(),
+                    text: "Merci pour votre message ! Je suis là pour vous aider.",
+                    timestamp: new Date(),
+                    isUser: false,
+                };
+                setMessages(prev => [...prev, botResponse]);
+            }, 1000);
+        }
+
+        setMessageText('');
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+    };
+
+    const handleDeleteMessage = (id: string) => {
+        Alert.alert(
+            'Supprimer le message',
+            'Êtes-vous sûr de vouloir supprimer ce message ?',
+            [
+                { text: 'Annuler', style: 'cancel' },
+                {
+                    text: 'Supprimer',
+                    style: 'destructive',
+                    onPress: () => {
+                        setMessages(messages.filter(msg => msg.id !== id));
+                        setSelectedMessageId(null);
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleEditMessage = (message: Message) => {
+        setMessageText(message.text);
+        setEditingMessageId(message.id);
+        setSelectedMessageId(null);
+    };
+
+    const handleAttachment = (type: 'image' | 'video' | 'document') => {
+        setIsAttachmentMenuVisible(false);
+
+        const attachmentMessage: Message = {
+            id: Date.now().toString(),
+            text: `Fichier ${type === 'image' ? 'image' : type === 'video' ? 'vidéo' : 'document'} sélectionné`,
+            timestamp: new Date(),
+            isUser: true,
+            attachments: [{
+                type,
+                name: `fichier.${type === 'image' ? 'jpg' : type === 'video' ? 'mp4' : 'pdf'}`,
+            }]
+        };
+
+        setMessages([...messages, attachmentMessage]);
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+    };
+
+    const handleVoiceRecording = () => {
+        if (isRecording) {
+            // Arrêter l'enregistrement
+            setIsRecording(false);
+            const voiceMessage: Message = {
+                id: Date.now().toString(),
+                text: 'Message vocal',
+                timestamp: new Date(),
+                isUser: true,
+                attachments: [{
+                    type: 'audio',
+                    name: 'audio.mp3',
+                }]
+            };
+            setMessages([...messages, voiceMessage]);
+            setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+        } else {
+            // Démarrer l'enregistrement
+            setIsRecording(true);
+        }
+    };
+
+    const formatTime = (date: Date) => {
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case 'conversations':
                 return <Text style={[styles.contentText, themeStyles.text]}>Historique des conversations</Text>;
-            // 'new_chat' logic is handled in main return to hide nav
             case 'plan':
                 return <Text style={[styles.contentText, themeStyles.text]}>Votre Plan</Text>;
             default:
@@ -80,35 +214,186 @@ export default function AskScreen() {
                         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                             <ArrowLeft size={24} color={themeStyles.text.color} />
                         </TouchableOpacity>
-                        <Text style={[styles.headerTitle, themeStyles.text]}>Nouveau Chat</Text>
+                        <Text style={[styles.headerTitle, themeStyles.text]}>
+                            {editingMessageId ? 'Modifier le message' : 'Nouveau Chat'}
+                        </Text>
                         <View style={{ width: 24 }} />
                     </View>
 
-                    <View style={styles.chatContent}>
-                        <Text style={[styles.contentText, themeStyles.subText]}>Commencez une nouvelle conversation...</Text>
-                    </View>
+                    {/* Messages Area */}
+                    <ScrollView
+                        ref={scrollViewRef}
+                        style={styles.messagesContainer}
+                        contentContainerStyle={styles.messagesContent}
+                    >
+                        {messages.length === 0 ? (
+                            <View style={styles.emptyState}>
+                                <Text style={[styles.emptyStateText, themeStyles.subText]}>
+                                    Commencez une nouvelle conversation...
+                                </Text>
+                            </View>
+                        ) : (
+                            messages.map((message) => (
+                                <TouchableOpacity
+                                    key={message.id}
+                                    activeOpacity={0.7}
+                                    onLongPress={() => message.isUser && setSelectedMessageId(message.id)}
+                                    style={[
+                                        styles.messageContainer,
+                                        message.isUser ? styles.messageUser : styles.messageBot
+                                    ]}
+                                >
+                                    <View
+                                        style={[
+                                            styles.messageBubble,
+                                            message.isUser ? themeStyles.messageBubbleUser : themeStyles.messageBubbleBot
+                                        ]}
+                                    >
+                                        <Text style={[
+                                            styles.messageText,
+                                            message.isUser ? themeStyles.messageTextUser : themeStyles.messageTextBot
+                                        ]}>
+                                            {message.text}
+                                        </Text>
+
+                                        {message.attachments && message.attachments.map((attachment, index) => (
+                                            <View key={index} style={styles.attachmentContainer}>
+                                                {attachment.type === 'image' && <ImageIcon size={16} color="#fff" />}
+                                                {attachment.type === 'video' && <Video size={16} color="#fff" />}
+                                                {attachment.type === 'document' && <FileText size={16} color="#fff" />}
+                                                {attachment.type === 'audio' && <Mic size={16} color="#fff" />}
+                                                <Text style={styles.attachmentText}>{attachment.name}</Text>
+                                            </View>
+                                        ))}
+
+                                        <Text style={[
+                                            styles.messageTime,
+                                            { color: message.isUser ? 'rgba(255,255,255,0.7)' : themeStyles.subText.color }
+                                        ]}>
+                                            {formatTime(message.timestamp)}
+                                        </Text>
+                                    </View>
+
+                                    {/* Message Actions Menu */}
+                                    {selectedMessageId === message.id && (
+                                        <View style={[styles.messageActionsMenu, themeStyles.navBg, { borderColor: themeStyles.divider.backgroundColor }]}>
+                                            <TouchableOpacity
+                                                style={styles.messageAction}
+                                                onPress={() => handleEditMessage(message)}
+                                            >
+                                                <Edit2 size={18} color={themeStyles.iconActive} />
+                                                <Text style={[styles.messageActionText, themeStyles.text]}>Modifier</Text>
+                                            </TouchableOpacity>
+                                            <View style={[styles.divider, themeStyles.divider]} />
+                                            <TouchableOpacity
+                                                style={styles.messageAction}
+                                                onPress={() => handleDeleteMessage(message.id)}
+                                            >
+                                                <Trash2 size={18} color="#ef4444" />
+                                                <Text style={[styles.messageActionText, { color: '#ef4444' }]}>Supprimer</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+                            ))
+                        )}
+                    </ScrollView>
+
+                    {/* Attachment Menu Modal */}
+                    <Modal
+                        visible={isAttachmentMenuVisible}
+                        transparent
+                        animationType="fade"
+                        onRequestClose={() => setIsAttachmentMenuVisible(false)}
+                    >
+                        <Pressable style={styles.modalOverlay} onPress={() => setIsAttachmentMenuVisible(false)}>
+                            <View style={[styles.attachmentMenu, themeStyles.navBg, { borderColor: themeStyles.divider.backgroundColor }]}>
+                                <TouchableOpacity
+                                    style={styles.attachmentOption}
+                                    onPress={() => handleAttachment('image')}
+                                >
+                                    <ImageIcon size={24} color={themeStyles.iconActive} />
+                                    <Text style={[styles.attachmentOptionText, themeStyles.text]}>Image</Text>
+                                </TouchableOpacity>
+
+                                <View style={[styles.divider, themeStyles.divider]} />
+
+                                <TouchableOpacity
+                                    style={styles.attachmentOption}
+                                    onPress={() => handleAttachment('video')}
+                                >
+                                    <Video size={24} color={themeStyles.iconActive} />
+                                    <Text style={[styles.attachmentOptionText, themeStyles.text]}>Vidéo</Text>
+                                </TouchableOpacity>
+
+                                <View style={[styles.divider, themeStyles.divider]} />
+
+                                <TouchableOpacity
+                                    style={styles.attachmentOption}
+                                    onPress={() => handleAttachment('document')}
+                                >
+                                    <FileText size={24} color={themeStyles.iconActive} />
+                                    <Text style={[styles.attachmentOptionText, themeStyles.text]}>Document</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Pressable>
+                    </Modal>
 
                     {/* Input Area */}
                     <View style={[styles.chatInputContainer, themeStyles.navBg, themeStyles.border]}>
-                        <View style={[styles.inputWrapper, { backgroundColor: themeStyles.inputBg }]}>
-                            <TextInput
-                                style={[styles.input, { color: themeStyles.inputText }]}
-                                placeholder="Message..."
-                                placeholderTextColor={isDark || isBlue ? '#8899a6' : '#6b7280'}
-                                value={messageText}
-                                onChangeText={setMessageText}
-                                multiline
-                            />
-                        </View>
-                        <View style={styles.actionButtons}>
-                            <TouchableOpacity style={styles.iconButton}>
-                                <Mic size={24} color={themeStyles.iconInactive} />
-                            </TouchableOpacity>
-                            {messageText.length > 0 && (
-                                <TouchableOpacity style={[styles.iconButton, styles.sendButton]}>
-                                    <Send size={20} color="#fff" />
+                        {editingMessageId && (
+                            <View style={[styles.editingIndicator, themeStyles.tabActiveBg]}>
+                                <Text style={[styles.editingText, themeStyles.tabActiveText]}>
+                                    Modification en cours...
+                                </Text>
+                                <TouchableOpacity onPress={() => {
+                                    setEditingMessageId(null);
+                                    setMessageText('');
+                                }}>
+                                    <X size={18} color={themeStyles.iconActive} />
                                 </TouchableOpacity>
-                            )}
+                            </View>
+                        )}
+
+                        <View style={styles.inputRow}>
+                            <TouchableOpacity
+                                style={styles.iconButton}
+                                onPress={() => setIsAttachmentMenuVisible(true)}
+                            >
+                                <Paperclip size={24} color={themeStyles.iconInactive} />
+                            </TouchableOpacity>
+
+                            <View style={[styles.inputWrapper, { backgroundColor: themeStyles.inputBg }]}>
+                                <TextInput
+                                    style={[styles.input, { color: themeStyles.inputText }]}
+                                    placeholder="Message..."
+                                    placeholderTextColor={isDark || isBlue ? '#8899a6' : '#6b7280'}
+                                    value={messageText}
+                                    onChangeText={setMessageText}
+                                    multiline
+                                />
+                            </View>
+
+                            <View style={styles.actionButtons}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.iconButton,
+                                        isRecording && styles.recordingButton
+                                    ]}
+                                    onPress={handleVoiceRecording}
+                                >
+                                    <Mic size={24} color={isRecording ? '#fff' : themeStyles.iconInactive} />
+                                </TouchableOpacity>
+
+                                {messageText.length > 0 && (
+                                    <TouchableOpacity
+                                        style={[styles.iconButton, styles.sendButton]}
+                                        onPress={handleSendMessage}
+                                    >
+                                        <Send size={20} color="#fff" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
                         </View>
                     </View>
                 </KeyboardAvoidingView>
@@ -281,8 +566,8 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        bottom: 80, // Height of bottomNav roughly
-        backgroundColor: 'rgba(0,0,0,0.3)',
+        bottom: 80,
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'flex-end',
     },
     themeMenu: {
@@ -339,24 +624,112 @@ const styles = StyleSheet.create({
     backButton: {
         padding: 5,
     },
-    chatContent: {
+    messagesContainer: {
+        flex: 1,
+    },
+    messagesContent: {
+        padding: 15,
+    },
+    emptyState: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingVertical: 100,
+    },
+    emptyStateText: {
+        fontSize: 16,
+    },
+    messageContainer: {
+        marginBottom: 15,
+        maxWidth: '80%',
+    },
+    messageUser: {
+        alignSelf: 'flex-end',
+    },
+    messageBot: {
+        alignSelf: 'flex-start',
+    },
+    messageBubble: {
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 18,
+    },
+    messageText: {
+        fontSize: 16,
+        lineHeight: 22,
+    },
+    messageTime: {
+        fontSize: 11,
+        marginTop: 4,
+    },
+    attachmentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+        paddingTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.2)',
+    },
+    attachmentText: {
+        color: '#fff',
+        fontSize: 13,
+        marginLeft: 6,
+    },
+    messageActionsMenu: {
+        position: 'absolute',
+        top: -70,
+        right: 0,
+        borderRadius: 12,
+        padding: 10,
+        borderWidth: 1,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        minWidth: 150,
+    },
+    messageAction: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 5,
+    },
+    messageActionText: {
+        fontSize: 15,
+        marginLeft: 10,
     },
     chatInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
         paddingHorizontal: 10,
         paddingVertical: 10,
         borderTopWidth: 1,
+    },
+    editingIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    editingText: {
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
     },
     inputWrapper: {
         flex: 1,
         borderRadius: 20,
         paddingHorizontal: 15,
         paddingVertical: 8,
-        marginRight: 10,
+        marginHorizontal: 8,
         minHeight: 40,
         maxHeight: 100,
     },
@@ -381,6 +754,36 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 5,
     },
+    recordingButton: {
+        backgroundColor: '#ef4444',
+        borderRadius: 20,
+        width: 36,
+        height: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    attachmentMenu: {
+        borderRadius: 16,
+        padding: 15,
+        borderWidth: 1,
+        marginHorizontal: 20,
+        marginBottom: 20,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    attachmentOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+    },
+    attachmentOptionText: {
+        fontSize: 16,
+        marginLeft: 15,
+    },
 });
-
-

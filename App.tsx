@@ -16,7 +16,7 @@ export default function App() {
   const [currentPath, setCurrentPath] = useState('/');
   const [theme, setTheme] = useState<Theme>('light');
 
-  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/trending'];
+  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/trending', '/auth'];
   const currentIndex = paths.indexOf(currentPath);
 
   const navigation = {
@@ -54,6 +54,8 @@ export default function App() {
         return <EventsScreen key="events" />;
       case '/trending':
         return <TrendingScreen key="trending" />;
+      case '/auth':
+        return <AuthScreen key="auth" />;
       default:
         return <WelcomeScreen key="welcome" />;
     }
