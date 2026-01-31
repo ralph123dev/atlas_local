@@ -141,6 +141,24 @@ export const TrendingPanel = () => {
         };
     });
 
+    const renderTrendingItems = () => {
+        const items: React.ReactNode[] = [];
+        MOCK_DATA.forEach((item, index) => {
+            items.push(<TrendingCard key={`item-${item.id}`} {...item} themeStyles={themeStyles} />);
+            if ((index + 1) % 3 === 0) {
+                items.push(
+                    <TouchableOpacity key={`see-all-${index}`} style={[styles.viewAllCard, themeStyles.cardBg]}>
+                        <View style={[styles.viewAllCircle, themeStyles.buttonBg]}>
+                            <ChevronRight size={24} color={themeStyles.buttonText.color} />
+                        </View>
+                        <Text style={[styles.viewAllCardText, themeStyles.text]}>Voir tout</Text>
+                    </TouchableOpacity>
+                );
+            }
+        });
+        return items;
+    };
+
     return (
         <View style={[StyleSheet.absoluteFill, styles.mainContainer]} pointerEvents="box-none">
             {/* Dimmer Background */}
@@ -163,16 +181,8 @@ export const TrendingPanel = () => {
 
                     {/* Section 1 */}
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-                        {MOCK_DATA.map((item) => (
-                            <TrendingCard key={item.id} {...item} themeStyles={themeStyles} />
-                        ))}
+                        {renderTrendingItems()}
                     </ScrollView>
-
-                    {/* Section 2 */}
-                    <TouchableOpacity style={[styles.viewAllButton, themeStyles.buttonBg]}>
-                        <Text style={[styles.viewAllText, themeStyles.buttonText]}>Voir toutes les tendances</Text>
-                        <ChevronRight size={20} color={themeStyles.buttonText.color} />
-                    </TouchableOpacity>
 
                     {/* Section 3 */}
                     <Text style={[styles.sectionTitle, themeStyles.text]}>Recommandés pour vous</Text>
@@ -354,6 +364,31 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#0057b7',
     },
+    viewAllCard: {
+        width: 140,
+        borderRadius: 16,
+        marginRight: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 3,
+        borderWidth: 1,
+    },
+    viewAllCircle: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10,
+    },
+    viewAllCardText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
 });
 
 interface TrendingCardProps {
@@ -389,4 +424,10 @@ const MOCK_DATA = [
     { id: 1, name: 'Le Café Parisien', category: 'Café & Détente', rating: 4.8, distance: '1.2km', imageUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=300&auto=format&fit=crop' },
     { id: 2, name: 'Cinéma Star', category: 'Divertissement', rating: 4.5, distance: '0.8km', imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=300&auto=format&fit=crop' },
     { id: 3, name: 'Parc Central', category: 'Plein air', rating: 4.9, distance: '2.5km', imageUrl: 'https://images.unsplash.com/photo-1496347646636-ea47f7d6b37b?q=80&w=300&auto=format&fit=crop' },
+    { id: 4, name: 'Musée d\'Art Moderne', category: 'Culture', rating: 4.7, distance: '3.1km', imageUrl: 'https://images.unsplash.com/photo-1518998053901-5348d3969105?q=80&w=300&auto=format&fit=crop' },
+    { id: 5, name: 'Burger & Co', category: 'Restauration', rating: 4.6, distance: '0.5km', imageUrl: 'https://images.unsplash.com/photo-1586190848861-99c8a3da7af8?q=80&w=300&auto=format&fit=crop' },
+    { id: 6, name: 'Salle de Sport Fit', category: 'Sport', rating: 4.4, distance: '1.0km', imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=300&auto=format&fit=crop' },
+    { id: 7, name: 'Librairie du Coin', category: 'Shopping', rating: 4.8, distance: '1.5km', imageUrl: 'https://images.unsplash.com/photo-1507842217121-9d5974d091b0?q=80&w=300&auto=format&fit=crop' },
+    { id: 8, name: 'Lac Bleu', category: 'Nature', rating: 4.9, distance: '5.0km', imageUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=300&auto=format&fit=crop' },
+    { id: 9, name: 'Théâtre National', category: 'Spectacle', rating: 4.7, distance: '2.2km', imageUrl: 'https://images.unsplash.com/photo-1503095392269-41f86433ae39?q=80&w=300&auto=format&fit=crop' },
 ];
