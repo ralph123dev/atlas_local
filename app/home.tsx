@@ -11,6 +11,7 @@ import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
+import { ContributeScreen } from '../components/ContributeScreen';
 import { SideMenu } from '../components/SideMenu';
 import { TrendingPanel } from '../components/TrendingPanel';
 import { NavigationContext } from './NavigationContext';
@@ -61,9 +62,13 @@ export default function HomeScreen() {
           </View>
         );
       case 'ask':
-        return <Text style={[styles.contentText, themeStyles.text]}>Posez vos questions ici</Text>;
+        return (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={[styles.contentText, themeStyles.text]}>Posez vos questions ici</Text>
+          </View>
+        );
       case 'contribute':
-        return <Text style={[styles.contentText, themeStyles.text]}>Contenu de l'onglet Contribute</Text>;
+        return <ContributeScreen />;
       default:
         return null;
     }
@@ -74,23 +79,39 @@ export default function HomeScreen() {
       <SafeAreaView style={[styles.container, themeStyles.container]}>
         <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
-        {/* Header avec recherche */}
-        <View style={[styles.header, themeStyles.header]}>
-          <View style={[styles.searchContainer, themeStyles.searchContainer]}>
-            <Search size={20} color={themeStyles.iconInactive} style={styles.searchIcon} />
-            <TextInput
-              style={[styles.searchInput, themeStyles.searchInput]}
-              placeholder="Rechercher un ser..."
-              placeholderTextColor={isDark || isBlue ? '#8899a6' : '#9ca3af'}
-            />
+        {/* Header Conditional */}
+        {activeTab === 'contribute' ? (
+          <View style={[styles.header, themeStyles.header]}>
+            <View style={styles.logoHeaderContainer}>
+              <Image
+                source={require('../assets/images/logo.jpg')}
+                style={[styles.logo, { borderRadius: 8 }]}
+              />
+              <Text style={[styles.logoText, themeStyles.text]}>Nexora</Text>
+            </View>
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/auth')}>
+              <User size={24} color={themeStyles.iconPrimary} />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.iconButton}>
-            <Mic size={24} color={themeStyles.iconPrimary} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/auth')}>
-            <User size={24} color={themeStyles.iconPrimary} />
-          </TouchableOpacity>
-        </View>
+        ) : (
+          <View style={[styles.header, themeStyles.header]}>
+            <View style={[styles.searchContainer, themeStyles.searchContainer]}>
+              <Search size={20} color={themeStyles.iconInactive} style={styles.searchIcon} />
+              <TextInput
+                style={[styles.searchInput, themeStyles.searchInput]}
+                placeholder="Rechercher un lieu..."
+                placeholderTextColor={isDark || isBlue ? '#8899a6' : '#9ca3af'}
+              />
+            </View>
+            <TouchableOpacity style={styles.iconButton}>
+              <Mic size={24} color={themeStyles.iconPrimary} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/auth')}>
+              <User size={24} color={themeStyles.iconPrimary} />
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={styles.content}>
           {renderContent()}
@@ -181,9 +202,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
   },
   contentText: {
     fontSize: 18,
@@ -252,6 +270,19 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
+  },
+  logoHeaderContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 32,
+    height: 32,
+    marginRight: 10,
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });
 

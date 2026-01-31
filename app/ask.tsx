@@ -5,8 +5,8 @@
  * @Last Modified: 2026-01-29
  * @Description: Application mobile d'exploration - Interface de chat.
  */
-import { ArrowLeft, Check, Droplet, Edit2, FileText, Image as ImageIcon, Map, MessageSquare, MessageSquarePlus, Mic, Moon, Palette, Paperclip, Send, Sun, Trash2, Video, X } from 'lucide-react-native';
-import React, { useContext } from 'react';
+import { ArrowLeft, Edit2, FileText, Image as ImageIcon, Map, MessageSquare, MessageSquarePlus, Mic, Paperclip, Send, Trash2, Video, X } from 'lucide-react-native';
+import React, { useContext, useRef, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContext } from './NavigationContext';
@@ -26,20 +26,55 @@ interface Message {
 
 export default function AskScreen() {
     const router = useContext(NavigationContext);
-    const { theme, setTheme, setThemeWithTransition } = useContext(ThemeContext);
+    const { theme } = useContext(ThemeContext);
+
+    // Restoration of missing states
+    const [activeTab, setActiveTab] = useState('conversations');
+
+    const [messageText, setMessageText] = useState('');
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [isRecording, setIsRecording] = useState(false);
+    const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+    const [isAttachmentMenuVisible, setIsAttachmentMenuVisible] = useState(false);
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const scrollViewRef = useRef<ScrollView>(null);
+
+    const isDark = theme === 'dark';
+    const isBlue = theme === 'blue';
+
+    // Restoration of dynamic styles
+    const themeStyles = {
+        container: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff' },
+        text: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
+        subText: { color: isDark || isBlue ? '#8899a6' : '#6b7280' },
+        border: { borderBottomColor: isDark ? '#374151' : isBlue ? '#38444d' : '#f3f4f6', borderTopColor: isDark ? '#374151' : isBlue ? '#38444d' : '#e5e7eb' },
+        navBg: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff' },
+        tabActiveBg: { backgroundColor: isDark ? '#374151' : isBlue ? '#22303c' : '#f0f9ff' },
+        tabActiveText: { color: isDark ? '#60a5fa' : isBlue ? '#1d9bf0' : '#0057b7' },
+        iconActive: isDark ? '#60a5fa' : isBlue ? '#1d9bf0' : '#0057b7',
+        iconInactive: isDark ? '#9ca3af' : isBlue ? '#8899a6' : '#6b7280',
+        inputBg: isDark ? '#374151' : isBlue ? '#273340' : '#f3f4f6',
+        inputText: isDark || isBlue ? '#f3f4f6' : '#1a1a1a',
+        divider: { backgroundColor: isDark ? '#374151' : isBlue ? '#38444d' : '#f3f4f6' },
+        messageBubbleUser: { backgroundColor: isDark ? '#0057b7' : isBlue ? '#1d9bf0' : '#0057b7' },
+        messageBubbleBot: { backgroundColor: isDark ? '#374151' : isBlue ? '#273340' : '#f3f4f6' },
+        messageTextUser: { color: '#fff' },
+        messageTextBot: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
+    };
+
+    const handleBack = () => {
+        if (activeTab === 'new_chat') {
+            setActiveTab('conversations');
+        } else {
+            router.push('/home');
+        }
+    };
+
+
 
     // ... (rest of state)
 
-    const selectThemeWithEvent = (newTheme: 'light' | 'dark' | 'blue', event: any) => {
-        const { pageX, pageY } = event.nativeEvent;
 
-        if (setThemeWithTransition) {
-            setThemeWithTransition(newTheme, { x: pageX, y: pageY });
-        } else {
-            setTheme(newTheme);
-        }
-        setIsThemeMenuVisible(false);
-    };
 
     const handleSendMessage = () => {
         if (messageText.trim().length === 0) return;
@@ -382,42 +417,7 @@ export default function AskScreen() {
                 {renderContent()}
             </View>
 
-            {/* Theme Selection Menu (Bottom Sheet Simulation) */}
-            {isThemeMenuVisible && (
-                <Pressable style={styles.modalOverlay} onPress={() => setIsThemeMenuVisible(false)}>
-                    <View style={[styles.themeMenu, themeStyles.navBg, { borderColor: isDark || isBlue ? '#38444d' : '#e5e7eb' }]}>
-                        <Text style={[styles.themeMenuTitle, themeStyles.text]}>Apparence</Text>
 
-                        <TouchableOpacity style={styles.themeOption} onPressIn={(e) => selectThemeWithEvent('light', e)}>
-                            <View style={styles.themeOptionLeft}>
-                                <Sun size={20} color={isDark || isBlue ? '#8899a6' : '#6b7280'} />
-                                <Text style={[styles.themeOptionText, themeStyles.text]}>Clair</Text>
-                            </View>
-                            {theme === 'light' && <Check size={20} color="#0057b7" />}
-                        </TouchableOpacity>
-
-                        <View style={[styles.divider, themeStyles.divider]} />
-
-                        <TouchableOpacity style={styles.themeOption} onPressIn={(e) => selectThemeWithEvent('dark', e)}>
-                            <View style={styles.themeOptionLeft}>
-                                <Moon size={20} color={isDark || isBlue ? '#8899a6' : '#6b7280'} />
-                                <Text style={[styles.themeOptionText, themeStyles.text]}>Sombre</Text>
-                            </View>
-                            {theme === 'dark' && <Check size={20} color="#60a5fa" />}
-                        </TouchableOpacity>
-
-                        <View style={[styles.divider, themeStyles.divider]} />
-
-                        <TouchableOpacity style={styles.themeOption} onPressIn={(e) => selectThemeWithEvent('blue', e)}>
-                            <View style={styles.themeOptionLeft}>
-                                <Droplet size={20} color={isDark || isBlue ? '#8899a6' : '#6b7280'} />
-                                <Text style={[styles.themeOptionText, themeStyles.text]}>Bleu</Text>
-                            </View>
-                            {theme === 'blue' && <Check size={20} color="#1d9bf0" />}
-                        </TouchableOpacity>
-                    </View>
-                </Pressable>
-            )}
 
             {/* Barre de navigation spécifique Ask */}
             <View style={[styles.bottomNav, themeStyles.navBg, themeStyles.border]}>
@@ -437,14 +437,7 @@ export default function AskScreen() {
                     <Text style={[styles.tabText, themeStyles.subText, activeTab === 'new_chat' && [styles.activeTabText, themeStyles.tabActiveText]]}>Nouveau</Text>
                 </TouchableOpacity>
 
-                {/* Bg / Theme Tab */}
-                <TouchableOpacity
-                    style={[styles.tab, isThemeMenuVisible && [styles.activeTab, themeStyles.tabActiveBg]]}
-                    onPress={toggleThemeMenu}
-                >
-                    <Palette size={24} color={isThemeMenuVisible ? themeStyles.iconActive : themeStyles.iconInactive} />
-                    <Text style={[styles.tabText, themeStyles.subText, isThemeMenuVisible && [styles.activeTabText, themeStyles.tabActiveText]]}>Thème</Text>
-                </TouchableOpacity>
+
 
                 <TouchableOpacity
                     style={[styles.tab, activeTab === 'plan' && [styles.activeTab, themeStyles.tabActiveBg]]}
