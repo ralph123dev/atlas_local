@@ -6,12 +6,13 @@
  * @Description: Application mobile d'exploration.
  */
 import * as ExpoLocation from 'expo-location';
-import { Coffee, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, Trees, User, Utensils } from 'lucide-react-native';
+import { Coffee, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, Trees, User, Utensils, X } from 'lucide-react-native';
 import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
 import { ContributeScreen } from '../components/ContributeScreen';
 import { SideMenu } from '../components/SideMenu';
 import { TrendingPanel } from '../components/TrendingPanel';
@@ -35,6 +36,11 @@ export default function HomeScreen() {
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
+  const [places, setPlaces] = useState<any[]>([]);
+  const [streetViewCoords, setStreetViewCoords] = useState<{ latitude: number, longitude: number } | null>(null);
+  const [isStreetViewVisible, setIsStreetViewVisible] = useState(false);
+  const [is3D, setIs3D] = useState(false);
+  const GOOGLE_API_KEY = "AIzaSyAOAGJB7TlVNo01s0-zVx_ObVRCkivqaNs";
 
   useEffect(() => {
     (async () => {
@@ -53,8 +59,22 @@ export default function HomeScreen() {
       };
       setRegion(newRegion);
       setIsMapLoading(false);
+      fetchNearbyPlaces(location.coords.latitude, location.coords.longitude);
     })();
   }, []);
+
+  const fetchNearbyPlaces = async (lat: number, lng: number) => {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1000&type=restaurant|cafe|shopping_mall|store&key=${GOOGLE_API_KEY}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.results) {
+        setPlaces(data.results);
+      }
+    } catch (error) {
+      console.log('Error fetching places:', error);
+    }
+  };
 
   const handleRecenter = () => {
     if (location && mapRef.current) {
@@ -64,6 +84,7 @@ export default function HomeScreen() {
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       }, 1000);
+      fetchNearbyPlaces(location.coords.latitude, location.coords.longitude);
     }
   };
 
@@ -81,9 +102,26 @@ export default function HomeScreen() {
           latitudeDelta: 0.02,
           longitudeDelta: 0.02,
         }, 1000);
+        fetchNearbyPlaces(latitude, longitude);
       }
     } catch (error) {
       console.log('Search error:', error);
+    }
+  };
+
+  const openStreetView = (lat: number, lng: number) => {
+    setStreetViewCoords({ latitude: lat, longitude: lng });
+    setIsStreetViewVisible(true);
+  };
+
+  const toggle3D = () => {
+    if (mapRef.current) {
+      const newPitch = is3D ? 0 : 45;
+      mapRef.current.animateCamera({
+        pitch: newPitch,
+        heading: is3D ? 0 : 20,
+      }, { duration: 1000 });
+      setIs3D(!is3D);
     }
   };
 
@@ -224,8 +262,39 @@ export default function HomeScreen() {
                   coordinate={searchLocation}
                   title={searchText}
                   pinColor="#0057b7"
+                  onPress={() => openStreetView(searchLocation.latitude, searchLocation.longitude)}
                 />
               )}
+
+              {places.map((place) => (
+                <Marker
+                  key={place.place_id}
+                  coordinate={{
+                    latitude: place.geometry.location.lat,
+                    longitude: place.geometry.location.lng,
+                  }}
+                  onPress={() => openStreetView(place.geometry.location.lat, place.geometry.location.lng)}
+                >
+                  <View style={styles.placeMarkerContainer}>
+                    {place.photos && place.photos.length > 0 ? (
+                      <Image
+                        source={{ uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference=${place.photos[0].photo_reference}&key=${GOOGLE_API_KEY}` }}
+                        style={styles.placeMarkerImage}
+                      />
+                    ) : (
+                      <View style={[styles.placeMarkerIcon, { backgroundColor: '#0057b7' }]}>
+                        <Utensils size={12} color="#fff" />
+                      </View>
+                    )}
+                  </View>
+                  <Callout>
+                    <View style={styles.calloutContainer}>
+                      <Text style={styles.calloutTitle}>{place.name}</Text>
+                      <Text style={styles.calloutSub}>Appuyez pour voir Street View</Text>
+                    </View>
+                  </Callout>
+                </Marker>
+              ))}
             </MapView>
             {/* Floating Search Bar */}
             <View style={styles.floatingHeader}>
@@ -270,13 +339,46 @@ export default function HomeScreen() {
               </ScrollView>
             </View>
 
+            {/* 3D Toggle Button */}
+            <TouchableOpacity
+              style={[styles.mapControlBtn, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff', bottom: 85 }]}
+              onPress={toggle3D}
+            >
+              <Text style={{ fontSize: 12, fontWeight: 'bold', color: is3D ? '#0057b7' : '#6b7280' }}>3D</Text>
+            </TouchableOpacity>
+
             {/* GPS Recenter Button */}
             <TouchableOpacity
-              style={[styles.gpsButton, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff' }]}
+              style={[styles.mapControlBtn, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff', bottom: 20 }]}
               onPress={handleRecenter}
             >
               <LucideLocate size={24} color="#0057b7" />
             </TouchableOpacity>
+
+            {/* Street View Modal */}
+            <Modal
+              visible={isStreetViewVisible}
+              animationType="slide"
+              transparent={false}
+              onRequestClose={() => setIsStreetViewVisible(false)}
+            >
+              <View style={{ flex: 1, backgroundColor: '#000' }}>
+                <SafeAreaView style={{ flex: 1 }}>
+                  <View style={styles.streetViewHeader}>
+                    <TouchableOpacity onPress={() => setIsStreetViewVisible(false)} style={styles.closeBtn}>
+                      <X size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.streetViewTitle}>Vue Street View (360°)</Text>
+                  </View>
+                  {streetViewCoords && (
+                    <WebView
+                      source={{ uri: `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${streetViewCoords.latitude},${streetViewCoords.longitude}` }}
+                      style={{ flex: 1 }}
+                    />
+                  )}
+                </SafeAreaView>
+              </View>
+            </Modal>
           </View>
         );
       case 'ask':
@@ -566,9 +668,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  gpsButton: {
+  mapControlBtn: {
     position: 'absolute',
-    bottom: 20,
     right: 20,
     width: 50,
     height: 50,
@@ -576,6 +677,58 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 101,
+  },
+  placeMarkerContainer: {
+    padding: 2,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  placeMarkerImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+  },
+  placeMarkerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calloutContainer: {
+    padding: 5,
+    minWidth: 120,
+  },
+  calloutTitle: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  calloutSub: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  streetViewHeader: {
+    height: 60,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#1a1a1a',
+  },
+  closeBtn: {
+    padding: 8,
+  },
+  streetViewTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 15,
   },
 });
 
