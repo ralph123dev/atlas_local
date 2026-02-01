@@ -1,5 +1,5 @@
 
-import { Bookmark, ChevronLeft, HeartHandshake, Map as MapLucideIcon, MessageCircleQuestion, Plus } from 'lucide-react-native';
+import { Bookmark, ChevronLeft, Heart, HeartHandshake, Map as MapLucideIcon, MapPin, MessageCircleQuestion, Plus, Stars } from 'lucide-react-native';
 import React, { useContext } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,19 +11,24 @@ export default function SavedScreen() {
     const { theme } = useContext(ThemeContext);
 
     const isDark = theme === 'dark';
-    const isBlue = theme === 'blue';
 
     const themeStyles = {
-        container: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff' },
-        text: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
-        subText: { color: isDark || isBlue ? '#9ca3af' : '#6b7280' },
-        header: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff', borderBottomColor: isDark ? '#374151' : '#f3f4f6' },
-        navBg: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff', borderTopColor: isDark ? '#374151' : '#e5e7eb' },
-        card: { backgroundColor: isDark ? '#2a2a2a' : isBlue ? '#1c2732' : '#fff', borderColor: isDark ? '#374151' : isBlue ? '#38444d' : '#e5e7eb' },
-        iconActive: isDark ? '#60a5fa' : '#0057b7',
+        container: { backgroundColor: isDark ? '#1a1a1a' : '#fff' },
+        text: { color: isDark ? '#f3f4f6' : '#1a1a1a' },
+        subText: { color: isDark ? '#9ca3af' : '#6b7280' },
+        header: { backgroundColor: isDark ? '#1a1a1a' : '#fff', borderBottomColor: isDark ? '#374151' : '#f3f4f6' },
+        navBg: { backgroundColor: isDark ? '#1a1a1a' : '#fff', borderTopColor: isDark ? '#374151' : '#e5e7eb' },
+        card: { backgroundColor: isDark ? '#2a2a2a' : '#fff', borderColor: isDark ? '#374151' : '#e5e7eb' },
         iconInactive: isDark ? '#9ca3af' : '#6b7280',
-        iconPrimary: isDark || isBlue ? '#f3f4f6' : '#1a1a1a',
+        iconPrimary: isDark ? '#f3f4f6' : '#1a1a1a',
+        border: { borderBottomColor: isDark ? '#374151' : '#f3f4f6' },
     };
+
+    const defaultLists = [
+        { id: 'fav', title: 'Favoris', icon: Heart, iconColor: '#e91e63' },
+        { id: 'visit', title: 'À visiter', icon: Stars, iconColor: '#0057b7' },
+        { id: 'routes', title: 'Trajets enregistrés', icon: MapPin, iconColor: '#4caf50' },
+    ];
 
     return (
         <SafeAreaView style={[styles.container, themeStyles.container]}>
@@ -43,11 +48,26 @@ export default function SavedScreen() {
                     <Text style={styles.newListText}>Créer une nouvelle liste</Text>
                 </TouchableOpacity>
 
-                {/* Placeholder for saved lists */}
-                <View style={styles.emptyContainer}>
-                    <Bookmark size={80} color={themeStyles.iconInactive} strokeWidth={1} />
-                    <Text style={[styles.emptyTitle, themeStyles.text]}>Aucune liste pour le moment</Text>
-                    <Text style={[styles.emptySubtitle, themeStyles.subText]}>Enregistrez des lieux pour les retrouver facilement ici.</Text>
+                <Text style={[styles.sectionTitle, themeStyles.text]}>Vos listes</Text>
+
+                {defaultLists.map((list) => (
+                    <TouchableOpacity key={list.id} style={[styles.listItem, themeStyles.border]}>
+                        <View style={[styles.listIconContainer, { backgroundColor: list.iconColor + '20' }]}>
+                            <list.icon size={22} color={list.iconColor} />
+                        </View>
+                        <View style={styles.listTextContainer}>
+                            <Text style={[styles.listTitle, themeStyles.text]}>{list.title}</Text>
+                            <Text style={[styles.listSubtitle, themeStyles.subText]}>0 lieu</Text>
+                        </View>
+                    </TouchableOpacity>
+                ))}
+
+                <View style={styles.divider} />
+
+                {/* Placeholder for empty state if needed, or just more content */}
+                <View style={styles.emptyInfo}>
+                    <Bookmark size={40} color={themeStyles.iconInactive} strokeWidth={1.5} />
+                    <Text style={[styles.emptySubtitle, themeStyles.subText]}>Enregistrez des lieux pour les retrouver rapidement ici.</Text>
                 </View>
             </ScrollView>
 
@@ -100,7 +120,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     scrollContent: {
-        padding: 20,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 100,
     },
     newListButton: {
         flexDirection: 'row',
@@ -115,21 +137,51 @@ const styles = StyleSheet.create({
         color: '#0057b7',
         marginLeft: 12,
     },
-    emptyContainer: {
-        alignItems: 'center',
-        marginTop: 60,
-    },
-    emptyTitle: {
+    sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    listItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        marginBottom: 8,
+    },
+    listIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    listTextContainer: {
+        flex: 1,
+    },
+    listTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    listSubtitle: {
+        fontSize: 13,
+        marginTop: 2,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#f3f4f6',
+        marginVertical: 20,
+    },
+    emptyInfo: {
+        alignItems: 'center',
         marginTop: 20,
-        marginBottom: 10,
     },
     emptySubtitle: {
-        fontSize: 14,
+        fontSize: 13,
         textAlign: 'center',
         paddingHorizontal: 40,
-        lineHeight: 20,
+        marginTop: 10,
+        lineHeight: 18,
     },
     bottomNav: {
         flexDirection: 'row',

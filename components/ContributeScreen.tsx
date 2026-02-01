@@ -1,5 +1,5 @@
 
-import { Award, Camera, Check, ChevronLeft, ChevronRight, Edit3, MapPin, MessageSquare, Navigation, PlusCircle, X } from 'lucide-react-native';
+import { Award, Camera, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit3, MapPin, MessageSquare, Navigation, PlusCircle, X } from 'lucide-react-native';
 import React, { useContext, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ThemeContext } from '../app/ThemeContext';
@@ -7,16 +7,15 @@ import { ThemeContext } from '../app/ThemeContext';
 export const ContributeScreen = () => {
     const { theme } = useContext(ThemeContext);
     const isDark = theme === 'dark';
-    const isBlue = theme === 'blue';
 
     const themeStyles = {
-        container: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff' },
-        card: { backgroundColor: isDark ? '#2a2a2a' : isBlue ? '#1c2732' : '#fff', borderColor: isDark ? '#374151' : isBlue ? '#38444d' : '#e5e7eb' },
-        text: { color: isDark || isBlue ? '#f3f4f6' : '#202124' },
-        subText: { color: isDark || isBlue ? '#9ca3af' : '#5f6368' },
-        divider: { backgroundColor: isDark ? '#374151' : isBlue ? '#38444d' : '#e5e7eb' },
-        progressBarBg: isDark ? '#4b5563' : isBlue ? '#273340' : '#e6e6e6',
-        progressBarFill: isDark ? '#60a5fa' : isBlue ? '#1d9bf0' : '#0057b7',
+        container: { backgroundColor: isDark ? '#1a1a1a' : '#fff' },
+        card: { backgroundColor: isDark ? '#2a2a2a' : '#fff', borderColor: isDark ? '#374151' : '#e5e7eb' },
+        text: { color: isDark ? '#f3f4f6' : '#202124' },
+        subText: { color: isDark ? '#9ca3af' : '#5f6368' },
+        divider: { backgroundColor: isDark ? '#374151' : '#e5e7eb' },
+        progressBarBg: isDark ? '#4b5563' : '#e6e6e6',
+        progressBarFill: isDark ? '#60a5fa' : '#0057b7',
     };
 
     const userProfile = {
@@ -51,13 +50,23 @@ export const ContributeScreen = () => {
     const [isQuestionModalVisible, setIsQuestionModalVisible] = useState(false);
     const [questionResponse, setQuestionResponse] = useState('');
     const scrollRef = useRef<ScrollView>(null);
+    const mainScrollRef = useRef<ScrollView>(null);
     const [scrollOffset, setScrollOffset] = useState(0);
+    const [verticalOffset, setVerticalOffset] = useState(0);
 
     const scrollActions = (direction: 'left' | 'right') => {
         if (scrollRef.current) {
             const newOffset = direction === 'left' ? Math.max(0, scrollOffset - 200) : scrollOffset + 200;
             scrollRef.current.scrollTo({ x: newOffset, animated: true });
             setScrollOffset(newOffset);
+        }
+    };
+
+    const handleVerticalScroll = (direction: 'up' | 'down') => {
+        if (mainScrollRef.current) {
+            const newOffset = direction === 'down' ? verticalOffset + 300 : Math.max(0, verticalOffset - 300);
+            mainScrollRef.current.scrollTo({ y: newOffset, animated: true });
+            setVerticalOffset(newOffset);
         }
     };
 
@@ -91,7 +100,14 @@ export const ContributeScreen = () => {
 
     return (
         <View style={[styles.mainContainer, themeStyles.container]}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+            <ScrollView
+                ref={mainScrollRef}
+                showsVerticalScrollIndicator={false}
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingBottom: 150, flexGrow: 1 }}
+                onScroll={(e) => setVerticalOffset(e.nativeEvent.contentOffset.y)}
+                scrollEventThrottle={16}
+            >
                 {/* Profile Section */}
                 <View style={[styles.section, styles.profileSection, themeStyles.card]}>
                     <View style={styles.profileHeader}>
@@ -182,11 +198,42 @@ export const ContributeScreen = () => {
                     </TouchableOpacity>
                 </View>
 
+                {/* Balloon Contribution Card */}
+                <View style={[styles.section, styles.balloonCard, themeStyles.card]}>
+                    <View style={styles.balloonIconBg}>
+                        <Text style={styles.balloonEmoji}>🎈</Text>
+                    </View>
+                    <Text style={[styles.balloonTitle, themeStyles.text]}>Contribuer</Text>
+                    <Text style={[styles.balloonDescription, themeStyles.subText]}>
+                        Vos contributions aident des millions de personnes à découvrir de nouveaux lieux et à prendre de meilleures décisions.
+                    </Text>
+                    <TouchableOpacity style={styles.contribNowBtn}>
+                        <Text style={styles.contribNowText}>Contribuer maintenant</Text>
+                    </TouchableOpacity>
+                </View>
+
                 {/* Additional Section */}
                 <View style={[styles.section, themeStyles.card, { alignItems: 'center', padding: 30 }]}>
                     <Text style={[styles.emptyFeedText, themeStyles.subText]}>Rédigez des avis, importez des photos et aidez les autres usagers en partageant vos expériences locales.</Text>
                 </View>
             </ScrollView>
+
+            {/* Vertical Scroll Chevrons */}
+            <View style={styles.verticalScrollContainer}>
+                <TouchableOpacity
+                    style={[styles.scrollFab, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff' }]}
+                    onPress={() => handleVerticalScroll('down')}
+                >
+                    <ChevronDown size={28} color="#0057b7" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.scrollFab, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff' }]}
+                    onPress={() => handleVerticalScroll('up')}
+                >
+                    <ChevronUp size={28} color="#0057b7" />
+                </TouchableOpacity>
+            </View>
 
             {/* Simulated Gallery Modal */}
             <Modal
@@ -472,6 +519,62 @@ const styles = StyleSheet.create({
         fontSize: 13,
         textAlign: 'center',
         lineHeight: 18,
+    },
+    // Balloon Card Styles
+    balloonCard: {
+        alignItems: 'center',
+        paddingVertical: 24,
+    },
+    balloonIconBg: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: '#fff5f5',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#fee2e2',
+    },
+    balloonEmoji: {
+        fontSize: 32,
+    },
+    balloonTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    balloonDescription: {
+        fontSize: 14,
+        textAlign: 'center',
+        paddingHorizontal: 20,
+        lineHeight: 20,
+        marginBottom: 16,
+    },
+    contribNowBtn: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+    },
+    contribNowText: {
+        color: '#34a853',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+    verticalScrollContainer: {
+        position: 'absolute',
+        bottom: 80,
+        left: 20,
+        right: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        zIndex: 100,
+    },
+    scrollFab: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     // Modal Styles
     modalContainer: {

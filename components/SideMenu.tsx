@@ -1,5 +1,5 @@
 
-import { Bookmark, Calendar, CloudSun, Droplet, MapPin, Moon, Sun, X } from 'lucide-react-native';
+import { Bookmark, Calendar, CloudSun, MapPin, Moon, Sun, X } from 'lucide-react-native';
 import React, { useContext, useEffect } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
@@ -26,13 +26,12 @@ export const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const opacity = useSharedValue(0);
 
     const isDark = theme === 'dark';
-    const isBlue = theme === 'blue';
 
     const themeStyles = {
-        container: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff' },
-        text: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
+        container: { backgroundColor: isDark ? '#1a1a1a' : '#fff' },
+        text: { color: isDark ? '#f3f4f6' : '#1a1a1a' },
         border: { borderBottomColor: isDark ? '#374151' : '#f3f4f6' },
-        icon: isDark || isBlue ? '#f3f4f6' : '#1a1a1a',
+        icon: isDark ? '#f3f4f6' : '#1a1a1a',
         overlay: { backgroundColor: 'rgba(0,0,0,0.5)' }
     };
 
@@ -133,13 +132,6 @@ export const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                         >
                             <Moon size={20} color={theme === 'dark' ? '#60a5fa' : themeStyles.icon} />
                             <Text style={[styles.themeBtnText, themeStyles.text, theme === 'dark' && { color: '#60a5fa' }]}>Sombre</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => setTheme('blue')}
-                            style={[styles.themeBtn, theme === 'blue' && styles.themeBtnActive]}
-                        >
-                            <Droplet size={20} color={theme === 'blue' ? '#1d9bf0' : themeStyles.icon} />
-                            <Text style={[styles.themeBtnText, themeStyles.text, theme === 'blue' && { color: '#1d9bf0' }]}>Bleu</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

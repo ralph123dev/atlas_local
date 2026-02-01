@@ -5,9 +5,9 @@
  * @Last Modified: 2026-01-24
  * @Description: Application mobile d'exploration.
  */
-import { HeartHandshake, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, User } from 'lucide-react-native';
+import { Coffee, HeartHandshake, Hotel, House, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, Trees, User, Utensils } from 'lucide-react-native';
 import React, { useContext, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
@@ -23,9 +23,8 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState('explorer');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMapLoading, setIsMapLoading] = useState(true);
-
   const isDark = theme === 'dark';
-  const isBlue = theme === 'blue';
+  const [searchText, setSearchText] = useState('');
 
   const themeStyles = {
     container: { backgroundColor: isDark ? '#1a1a1a' : '#fff' },
@@ -40,6 +39,7 @@ export default function HomeScreen() {
     iconActive: isDark ? '#60a5fa' : '#0057b7',
     iconInactive: isDark ? '#9ca3af' : '#6b7280',
     iconPrimary: isDark ? '#f3f4f6' : '#1a1a1a',
+    border: { borderBottomColor: isDark ? '#374151' : '#f3f4f6' },
   };
 
   const renderContent = () => {
@@ -58,7 +58,58 @@ export default function HomeScreen() {
               style={{ flex: 1 }}
               onLoadStart={() => setIsMapLoading(true)}
               onLoadEnd={() => setIsMapLoading(false)}
+              injectedJavaScript={`
+                (function() {
+                  const hideElements = () => {
+                    const selectors = ['#search-box-container', '.search-box-container', '.header', '.footer', '#msHeader'];
+                    selectors.forEach(selector => {
+                      const el = document.querySelector(selector);
+                      if (el) el.style.display = 'none';
+                    });
+                  };
+                  hideElements();
+                  setTimeout(hideElements, 1000);
+                  setTimeout(hideElements, 3000);
+                })();
+                true;
+              `}
             />
+            {/* Floating Search Bar */}
+            <View style={styles.floatingHeader}>
+              <View style={[styles.floatingSearchContainer, themeStyles.searchContainer, styles.shadow]}>
+                <Image source={require('../assets/images/logo.jpg')} style={styles.searchLogo} />
+                <TextInput
+                  style={[styles.searchInput, themeStyles.searchInput]}
+                  placeholder="Rechercher ici"
+                  placeholderTextColor={isDark ? '#8899a6' : '#9ca3af'}
+                  value={searchText}
+                  onChangeText={setSearchText}
+                />
+                <TouchableOpacity style={styles.searchIconBtn}>
+                  <Mic size={20} color={themeStyles.iconPrimary} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.searchIconBtn} onPress={() => router.push('/auth')}>
+                  <User size={20} color={themeStyles.iconPrimary} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickActionsScroll} contentContainerStyle={styles.quickActionsContent}>
+                {[
+                  { label: 'Domicile', icon: House },
+                  { label: 'Restaurants', icon: Utensils },
+                  { label: 'Hôtels', icon: Hotel },
+                  { label: 'Cafés', icon: Coffee },
+                  { label: 'Parcs', icon: Trees }
+                ].map((item) => (
+                  <TouchableOpacity key={item.label} style={[styles.quickActionBtn, themeStyles.searchContainer, styles.shadow]} onPress={() => setSearchText(item.label)}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      {item.icon && <item.icon size={16} color={themeStyles.text.color} style={{ marginRight: 6 }} />}
+                      <Text style={[styles.quickActionText, themeStyles.text]}>{item.label}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           </View>
         );
       case 'ask':
@@ -94,14 +145,14 @@ export default function HomeScreen() {
               <User size={24} color={themeStyles.iconPrimary} />
             </TouchableOpacity>
           </View>
-        ) : (
+        ) : activeTab === 'explorer' ? null : (
           <View style={[styles.header, themeStyles.header]}>
             <View style={[styles.searchContainer, themeStyles.searchContainer]}>
               <Search size={20} color={themeStyles.iconInactive} style={styles.searchIcon} />
               <TextInput
                 style={[styles.searchInput, themeStyles.searchInput]}
                 placeholder="Rechercher un lieu..."
-                placeholderTextColor={isDark || isBlue ? '#8899a6' : '#9ca3af'}
+                placeholderTextColor={isDark ? '#8899a6' : '#9ca3af'}
               />
             </View>
             <TouchableOpacity style={styles.iconButton}>
@@ -283,6 +334,55 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  floatingHeader: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+  },
+  floatingSearchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    marginHorizontal: 15,
+    borderRadius: 24,
+    paddingHorizontal: 12,
+    height: 48,
+  },
+  searchLogo: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    marginRight: 10,
+  },
+  searchIconBtn: {
+    padding: 8,
+  },
+  quickActionsScroll: {
+    marginTop: 12,
+  },
+  quickActionsContent: {
+    paddingHorizontal: 15,
+  },
+  quickActionBtn: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+  },
+  quickActionText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  shadow: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });
 

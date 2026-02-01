@@ -18,12 +18,11 @@ export default function IntroScreen() {
   const { theme } = useContext(ThemeContext);
 
   const isDark = theme === 'dark';
-  const isBlue = theme === 'blue';
 
   const themeStyles = {
-    container: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff' },
-    text: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
-    subText: { color: isDark ? '#9ca3af' : isBlue ? '#8899a6' : '#6b7280' },
+    container: { backgroundColor: isDark ? '#1a1a1a' : '#fff' },
+    text: { color: isDark ? '#f3f4f6' : '#1a1a1a' },
+    subText: { color: isDark ? '#9ca3af' : '#6b7280' },
   };
 
   return (
