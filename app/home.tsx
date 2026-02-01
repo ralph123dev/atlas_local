@@ -28,6 +28,7 @@ export default function HomeScreen() {
   const isDark = theme === 'dark';
   const [searchText, setSearchText] = useState('');
   const [searchLocation, setSearchLocation] = useState<{ latitude: number, longitude: number } | null>(null);
+  const [is3D, setIs3D] = useState(false);
   const mapRef = React.useRef<MapView>(null);
   const [location, setLocation] = useState<ExpoLocation.LocationObject | null>(null);
   const [region, setRegion] = useState({
@@ -39,7 +40,6 @@ export default function HomeScreen() {
   const [places, setPlaces] = useState<any[]>([]);
   const [streetViewCoords, setStreetViewCoords] = useState<{ latitude: number, longitude: number } | null>(null);
   const [isStreetViewVisible, setIsStreetViewVisible] = useState(false);
-  const [is3D, setIs3D] = useState(false);
   const GOOGLE_API_KEY = "AIzaSyAOAGJB7TlVNo01s0-zVx_ObVRCkivqaNs";
 
   useEffect(() => {
@@ -248,6 +248,7 @@ export default function HomeScreen() {
               style={{ flex: 1 }}
               region={region}
               showsUserLocation={true}
+              showsMyLocationButton={false}
               showsPointsOfInterest={true}
               showsCompass={false}
               showsBuildings={true}
@@ -321,7 +322,7 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </View>
 
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickActionsScroll} contentContainerStyle={styles.quickActionsContent}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" style={styles.quickActionsScroll} contentContainerStyle={styles.quickActionsContent}>
                 {[
                   { label: 'Domicile', icon: House },
                   { label: 'Restaurants', icon: Utensils },
@@ -339,21 +340,22 @@ export default function HomeScreen() {
               </ScrollView>
             </View>
 
-            {/* 3D Toggle Button */}
-            <TouchableOpacity
-              style={[styles.mapControlBtn, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff', bottom: 85 }]}
-              onPress={toggle3D}
-            >
-              <Text style={{ fontSize: 12, fontWeight: 'bold', color: is3D ? '#0057b7' : '#6b7280' }}>3D</Text>
-            </TouchableOpacity>
+            {/* Map Controls */}
+            <View style={styles.mapControlsContainer}>
+              <TouchableOpacity
+                style={[styles.mapControlButton, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff' }]}
+                onPress={toggle3D}
+              >
+                <Text style={{ fontWeight: 'bold', color: is3D ? '#0057b7' : '#6b7280', fontSize: 13 }}>3D</Text>
+              </TouchableOpacity>
 
-            {/* GPS Recenter Button */}
-            <TouchableOpacity
-              style={[styles.mapControlBtn, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff', bottom: 20 }]}
-              onPress={handleRecenter}
-            >
-              <LucideLocate size={24} color="#0057b7" />
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.mapControlButton, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff' }]}
+                onPress={handleRecenter}
+              >
+                <LucideLocate size={22} color="#0057b7" />
+              </TouchableOpacity>
+            </View>
 
             {/* Street View Modal */}
             <Modal
@@ -606,7 +608,7 @@ const styles = StyleSheet.create({
   },
   floatingHeader: {
     position: 'absolute',
-    top: 50,
+    top: 30,
     left: 0,
     right: 0,
     zIndex: 100,
@@ -668,15 +670,21 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  mapControlBtn: {
+  mapControlsContainer: {
     position: 'absolute',
-    right: 20,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    bottom: 25,
+    right: 15,
+    zIndex: 101,
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+  },
+  mapControlButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 101,
+    marginBottom: 10,
   },
   placeMarkerContainer: {
     padding: 2,

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
-import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, State } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import AskScreen from './app/ask';
 import AuthScreen from './app/auth';
@@ -10,6 +10,7 @@ import WelcomeScreen from './app/index';
 import IntroScreen from './app/intro';
 import LocationScreen from './app/location';
 import { NavigationContext } from './app/NavigationContext';
+import SavedScreen from './app/saved';
 import { Theme, ThemeContext } from './app/ThemeContext';
 import TrendingScreen from './app/trending';
 import WeatherScreen from './app/weather';
@@ -21,7 +22,7 @@ const MAX_RADIUS = Math.sqrt(SCREEN_WIDTH ** 2 + SCREEN_HEIGHT ** 2);
 // Helper for Reanimated
 const getThemeColor = (t: Theme) => {
   'worklet';
-  return t === 'light' ? '#fff' : t === 'blue' ? '#15202b' : t === 'dark' ? '#1a1a1a' : '#1a1a1a';
+  return t === 'light' ? '#fff' : '#1a1a1a';
 };
 
 export default function App() {
@@ -36,7 +37,7 @@ export default function App() {
   // Reanimated values
   const rippleScale = useSharedValue(0);
 
-  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/trending', '/auth'];
+  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/trending', '/auth', '/saved'];
   const currentIndex = paths.indexOf(currentPath);
 
   const navigation = {
@@ -83,6 +84,7 @@ export default function App() {
       case '/events': return <EventsScreen key="events" />;
       case '/trending': return <TrendingScreen key="trending" />;
       case '/auth': return <AuthScreen key="auth" />;
+      case '/saved': return <SavedScreen key="saved" />;
       default: return <WelcomeScreen key="welcome" />;
     }
   };
@@ -105,20 +107,19 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeContext.Provider value={{ theme, setTheme, setThemeWithTransition }}>
         <NavigationContext.Provider value={navigation}>
-          <PanGestureHandler onHandlerStateChange={onHandlerStateChange}>
-            <View style={{ flex: 1 }}>
-              {/* Background Layer (Previous Theme OR Current Theme if not animating) */}
-              <View style={[styles.container, { backgroundColor: getThemeColor(isAnimating ? previousTheme : theme) }]}>
-                {renderContent()}
-              </View>
+          <View style={{ flex: 1 }}>
+            {/* Background Layer (Previous Theme OR Current Theme if not animating) */}
+            <View style={[styles.container, { backgroundColor: getThemeColor(isAnimating ? previousTheme : theme) }]}>
+              {renderContent()}
+            </View>
 
-              {/* Animation Layer (Current Theme expanding) */}
-              {isAnimating && (
-                <View style={[StyleSheet.absoluteFill, { overflow: 'hidden', zIndex: 9999 }]} pointerEvents="none">
-                  <Animated.View style={[styles.ripple, animatedStyle]} />
-                </View>
-              )}
-              {/* 
+            {/* Animation Layer (Current Theme expanding) */}
+            {isAnimating && (
+              <View style={[StyleSheet.absoluteFill, { overflow: 'hidden', zIndex: 9999 }]} pointerEvents="none">
+                <Animated.View style={[styles.ripple, animatedStyle]} />
+              </View>
+            )}
+            {/* 
                   Note: A true "mask" of the whole app content is very hard in RN without native modules. 
                   Here we simulated the "background color" fill. 
                   For a true content mask, we would need to duplicate the entire app hierarchy which is too heavy.
@@ -148,8 +149,7 @@ export default function App() {
                   2. OR: Just animate a colored circle of the NEW theme over the OLD theme, 
                      then switch the actual theme state when animation covers screen.
                */}
-            </View>
-          </PanGestureHandler>
+          </View>
         </NavigationContext.Provider>
       </ThemeContext.Provider>
     </GestureHandlerRootView>
