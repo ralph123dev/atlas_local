@@ -5,12 +5,13 @@
  * @Last Modified: 2026-01-24
  * @Description: Application mobile d'exploration.
  */
-import { Coffee, HeartHandshake, Hotel, House, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, Trees, User, Utensils } from 'lucide-react-native';
-import React, { useContext, useState } from 'react';
+import * as ExpoLocation from 'expo-location';
+import { Coffee, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, Trees, User, Utensils } from 'lucide-react-native';
+import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { WebView } from 'react-native-webview';
 import { ContributeScreen } from '../components/ContributeScreen';
 import { SideMenu } from '../components/SideMenu';
 import { TrendingPanel } from '../components/TrendingPanel';
@@ -25,6 +26,156 @@ export default function HomeScreen() {
   const [isMapLoading, setIsMapLoading] = useState(true);
   const isDark = theme === 'dark';
   const [searchText, setSearchText] = useState('');
+  const [searchLocation, setSearchLocation] = useState<{ latitude: number, longitude: number } | null>(null);
+  const mapRef = React.useRef<MapView>(null);
+  const [location, setLocation] = useState<ExpoLocation.LocationObject | null>(null);
+  const [region, setRegion] = useState({
+    latitude: 5.452391,
+    longitude: 10.0683,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
+  });
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await ExpoLocation.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setIsMapLoading(false);
+        return;
+      }
+
+      let location = await ExpoLocation.getCurrentPositionAsync({});
+      setLocation(location);
+      const newRegion = {
+        ...region,
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      setRegion(newRegion);
+      setIsMapLoading(false);
+    })();
+  }, []);
+
+  const handleRecenter = () => {
+    if (location && mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }, 1000);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!searchText.trim()) return;
+    try {
+      const results = await ExpoLocation.geocodeAsync(searchText);
+      if (results.length > 0) {
+        const { latitude, longitude } = results[0];
+        const newLocation = { latitude, longitude };
+        setSearchLocation(newLocation);
+        mapRef.current?.animateToRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.02,
+          longitudeDelta: 0.02,
+        }, 1000);
+      }
+    } catch (error) {
+      console.log('Search error:', error);
+    }
+  };
+
+  const darkMapStyle = [
+    {
+      "elementType": "geometry",
+      "stylers": [{ "color": "#242f3e" }]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#746855" }]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [{ "color": "#242f3e" }]
+    },
+    {
+      "featureType": "administrative.locality",
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#d59563" }]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#d59563" }]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#263c3f" }]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#6b9a76" }]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#38414e" }]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry.stroke",
+      "stylers": [{ "color": "#212a37" }]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#9ca5b3" }]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#746855" }]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry.stroke",
+      "stylers": [{ "color": "#1f2835" }]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#f3d19c" }]
+    },
+    {
+      "featureType": "transit",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#2f3948" }]
+    },
+    {
+      "featureType": "transit.station",
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#d59563" }]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#17263c" }]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#515c6d" }]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.stroke",
+      "stylers": [{ "color": "#17263c" }]
+    }
+  ];
 
   const themeStyles = {
     container: { backgroundColor: isDark ? '#1a1a1a' : '#fff' },
@@ -53,37 +204,45 @@ export default function HomeScreen() {
                 <Text style={[styles.loadingText, themeStyles.text]}>Chargement de la carte...</Text>
               </View>
             )}
-            <WebView
-              source={{ uri: 'https://www.bing.com/maps?&cp=5.452391~10.0683&lvl=11&v=2&sV=1&mepi=59~~Embedded~LargeMapLink&FORM=MIRE' }}
+            <MapView
+              ref={mapRef}
+              provider={PROVIDER_GOOGLE}
               style={{ flex: 1 }}
-              onLoadStart={() => setIsMapLoading(true)}
-              onLoadEnd={() => setIsMapLoading(false)}
-              injectedJavaScript={`
-                (function() {
-                  const hideElements = () => {
-                    const selectors = ['#search-box-container', '.search-box-container', '.header', '.footer', '#msHeader'];
-                    selectors.forEach(selector => {
-                      const el = document.querySelector(selector);
-                      if (el) el.style.display = 'none';
-                    });
-                  };
-                  hideElements();
-                  setTimeout(hideElements, 1000);
-                  setTimeout(hideElements, 3000);
-                })();
-                true;
-              `}
-            />
+              region={region}
+              showsUserLocation={true}
+              showsPointsOfInterest={true}
+              showsCompass={false}
+              showsBuildings={true}
+              showsIndoors={true}
+              mapId={isDark ? undefined : "8b8b0cea4273e8dffe2dc07d"}
+              customMapStyle={isDark ? darkMapStyle : []}
+              userInterfaceStyle={isDark ? 'dark' : 'light'}
+              onMapReady={() => setIsMapLoading(false)}
+            >
+              {searchLocation && (
+                <Marker
+                  coordinate={searchLocation}
+                  title={searchText}
+                  pinColor="#0057b7"
+                />
+              )}
+            </MapView>
             {/* Floating Search Bar */}
             <View style={styles.floatingHeader}>
               <View style={[styles.floatingSearchContainer, themeStyles.searchContainer, styles.shadow]}>
-                <Image source={require('../assets/images/logo.jpg')} style={styles.searchLogo} />
+                <View style={styles.searchBranding}>
+                  <Image source={require('../assets/images/logo.jpg')} style={styles.searchLogo} />
+                  <Text style={[styles.brandingText, themeStyles.text]}>Nexora</Text>
+                </View>
+                <View style={styles.searchDivider} />
                 <TextInput
                   style={[styles.searchInput, themeStyles.searchInput]}
                   placeholder="Rechercher ici"
                   placeholderTextColor={isDark ? '#8899a6' : '#9ca3af'}
                   value={searchText}
                   onChangeText={setSearchText}
+                  onSubmitEditing={handleSearch}
+                  returnKeyType="search"
                 />
                 <TouchableOpacity style={styles.searchIconBtn}>
                   <Mic size={20} color={themeStyles.iconPrimary} />
@@ -110,6 +269,14 @@ export default function HomeScreen() {
                 ))}
               </ScrollView>
             </View>
+
+            {/* GPS Recenter Button */}
+            <TouchableOpacity
+              style={[styles.gpsButton, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff' }]}
+              onPress={handleRecenter}
+            >
+              <LucideLocate size={24} color="#0057b7" />
+            </TouchableOpacity>
           </View>
         );
       case 'ask':
@@ -355,6 +522,21 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
+  },
+  searchBranding: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  brandingText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 6,
+  },
+  searchDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#e5e7eb',
     marginRight: 10,
   },
   searchIconBtn: {
@@ -383,6 +565,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
+  },
+  gpsButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 101,
   },
 });
 

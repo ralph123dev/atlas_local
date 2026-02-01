@@ -12,6 +12,9 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Cette application a besoin d'accéder à votre position pour afficher la météo locale."
+      },
+      "config": {
+        "googleMapsApiKey": "AIzaSyAOAGJB7TlVNo01s0-zVx_ObVRCkivqaNs"
       }
     },
     "android": {
@@ -26,7 +29,12 @@
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
-      ]
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAOAGJB7TlVNo01s0-zVx_ObVRCkivqaNs"
+        }
+      }
     },
     "web": {
       "output": "static",
