@@ -1,22 +1,17 @@
-/**
- * @Project: Atlas Local
- * @Author: Ralph <ralphurgue@gmail.com>
- * @Date: 2026-01-12
- * @Last Modified: 2026-01-29
- * @Description: Application mobile d'exploration - Interface de chat.
- */
 import { ArrowLeft, Edit2, FileText, Image as ImageIcon, Map, MessageSquare, MessageSquarePlus, Mic, Paperclip, Send, Trash2, Video, X } from 'lucide-react-native';
 import React, { useContext, useRef, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContext } from './NavigationContext';
 import { ThemeContext } from './ThemeContext';
-
+/**
+ * Interface définissant la structure d'un message dans le chat.
+ */
 interface Message {
     id: string;
     text: string;
     timestamp: Date;
-    isUser: boolean;
+    isUser: boolean; // True si le message vient de l'utilisateur, False si c'est le bot
     attachments?: {
         type: 'image' | 'video' | 'document' | 'audio';
         name: string;
@@ -28,21 +23,21 @@ export default function AskScreen() {
     const router = useContext(NavigationContext);
     const { theme } = useContext(ThemeContext);
 
-    // Restoration of missing states
-    const [activeTab, setActiveTab] = useState('conversations');
+    // États du composant
+    const [activeTab, setActiveTab] = useState('conversations'); // Gère l'onglet actif (conversations, plan, ou nouveau chat)
 
-    const [messageText, setMessageText] = useState('');
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [isRecording, setIsRecording] = useState(false);
-    const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
-    const [isAttachmentMenuVisible, setIsAttachmentMenuVisible] = useState(false);
-    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [messageText, setMessageText] = useState(''); // Texte saisi dans l'input
+    const [messages, setMessages] = useState<Message[]>([]); // Liste des messages affichés
+    const [isRecording, setIsRecording] = useState(false); // État de l'enregistrement vocal
+    const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null); // ID du message sélectionné pour actions (edit/delete)
+    const [isAttachmentMenuVisible, setIsAttachmentMenuVisible] = useState(false); // Visibilité du menu des pièces jointes
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null); // ID du message en cours d'édition
     const scrollViewRef = useRef<ScrollView>(null);
 
     const isDark = theme === 'dark';
     const isBlue = theme === 'blue';
 
-    // Restoration of dynamic styles
+    // Styles dynamiques basés sur le thème actuel
     const themeStyles = {
         container: { backgroundColor: isDark ? '#1a1a1a' : isBlue ? '#15202b' : '#fff' },
         text: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
@@ -62,6 +57,9 @@ export default function AskScreen() {
         messageTextBot: { color: isDark || isBlue ? '#f3f4f6' : '#1a1a1a' },
     };
 
+    /**
+     * Gère le retour en arrière ou le changement d'onglet
+     */
     const handleBack = () => {
         if (activeTab === 'new_chat') {
             setActiveTab('conversations');
@@ -70,12 +68,9 @@ export default function AskScreen() {
         }
     };
 
-
-
-    // ... (rest of state)
-
-
-
+    /**
+     * Envoie un message ou enregistre les modifications d'un message existant
+     */
     const handleSendMessage = () => {
         if (messageText.trim().length === 0) return;
 
@@ -88,7 +83,7 @@ export default function AskScreen() {
             ));
             setEditingMessageId(null);
         } else {
-            // Créer un nouveau message
+            // Créer un nouveau message utilisateur
             const newMessage: Message = {
                 id: Date.now().toString(),
                 text: messageText.trim(),
@@ -97,7 +92,7 @@ export default function AskScreen() {
             };
             setMessages([...messages, newMessage]);
 
-            // Simuler une réponse du bot après 1 seconde
+            // Simulation d'une réponse de l'IA (bot) après un délai de 1 seconde
             setTimeout(() => {
                 const botResponse: Message = {
                     id: (Date.now() + 1).toString(),
@@ -109,7 +104,7 @@ export default function AskScreen() {
             }, 1000);
         }
 
-        setMessageText('');
+        setMessageText(''); // Réinitialisation de l'input
         setTimeout(() => {
             scrollViewRef.current?.scrollToEnd({ animated: true });
         }, 100);

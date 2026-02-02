@@ -1,5 +1,5 @@
 
-import { Award, Camera, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit3, MapPin, MessageSquare, Navigation, PlusCircle, X } from 'lucide-react-native';
+import { Award, Camera, Check, Edit3, MapPin, MessageSquare, Navigation, PlusCircle, X } from 'lucide-react-native';
 import React, { useContext, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ThemeContext } from '../app/ThemeContext';
@@ -51,24 +51,6 @@ export const ContributeScreen = () => {
     const [questionResponse, setQuestionResponse] = useState('');
     const scrollRef = useRef<ScrollView>(null);
     const mainScrollRef = useRef<ScrollView>(null);
-    const [scrollOffset, setScrollOffset] = useState(0);
-    const [verticalOffset, setVerticalOffset] = useState(0);
-
-    const scrollActions = (direction: 'left' | 'right') => {
-        if (scrollRef.current) {
-            const newOffset = direction === 'left' ? Math.max(0, scrollOffset - 200) : scrollOffset + 200;
-            scrollRef.current.scrollTo({ x: newOffset, animated: true });
-            setScrollOffset(newOffset);
-        }
-    };
-
-    const handleVerticalScroll = (direction: 'up' | 'down') => {
-        if (mainScrollRef.current) {
-            const newOffset = direction === 'down' ? verticalOffset + 300 : Math.max(0, verticalOffset - 300);
-            mainScrollRef.current.scrollTo({ y: newOffset, animated: true });
-            setVerticalOffset(newOffset);
-        }
-    };
 
     const handleTaskPress = (taskId: number) => {
         if (taskId === 1) { // Publier photos
@@ -105,8 +87,6 @@ export const ContributeScreen = () => {
                 showsVerticalScrollIndicator={false}
                 style={{ flex: 1 }}
                 contentContainerStyle={{ paddingBottom: 150, flexGrow: 1 }}
-                onScroll={(e) => setVerticalOffset(e.nativeEvent.contentOffset.y)}
-                scrollEventThrottle={16}
             >
                 {/* Profile Section */}
                 <View style={[styles.section, styles.profileSection, themeStyles.card]}>
@@ -116,9 +96,6 @@ export const ContributeScreen = () => {
                             <Text style={[styles.userName, themeStyles.text]}>{userProfile.name}</Text>
                             <Text style={[styles.userLevel, { color: '#e85d04' }]}>{userProfile.level}</Text>
                         </View>
-                        <TouchableOpacity>
-                            <ChevronRight size={20} color={themeStyles.subText.color} />
-                        </TouchableOpacity>
                     </View>
 
                     <View style={styles.progressContainer}>
@@ -135,17 +112,12 @@ export const ContributeScreen = () => {
 
                 {/* Horizontal Action Menu */}
                 <View style={styles.actionsContainer}>
-                    <TouchableOpacity style={styles.chevronButton} onPress={() => scrollActions('left')}>
-                        <ChevronLeft size={20} color={themeStyles.subText.color} />
-                    </TouchableOpacity>
 
                     <ScrollView
                         ref={scrollRef}
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.actionsScrollContent}
-                        onScroll={(event) => setScrollOffset(event.nativeEvent.contentOffset.x)}
-                        scrollEventThrottle={16}
                     >
                         {actionButtons.map((btn, index) => (
                             <TouchableOpacity key={index} style={styles.actionButton}>
@@ -157,9 +129,6 @@ export const ContributeScreen = () => {
                         ))}
                     </ScrollView>
 
-                    <TouchableOpacity style={styles.chevronButton} onPress={() => scrollActions('right')}>
-                        <ChevronRight size={20} color={themeStyles.subText.color} />
-                    </TouchableOpacity>
                 </View>
 
                 {/* Badge Challenge Section */}
@@ -218,22 +187,6 @@ export const ContributeScreen = () => {
                 </View>
             </ScrollView>
 
-            {/* Vertical Scroll Chevrons */}
-            <View style={styles.verticalScrollContainer}>
-                <TouchableOpacity
-                    style={[styles.scrollFab, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff' }]}
-                    onPress={() => handleVerticalScroll('down')}
-                >
-                    <ChevronDown size={28} color="#0057b7" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.scrollFab, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff' }]}
-                    onPress={() => handleVerticalScroll('up')}
-                >
-                    <ChevronUp size={28} color="#0057b7" />
-                </TouchableOpacity>
-            </View>
 
             {/* Simulated Gallery Modal */}
             <Modal
@@ -410,12 +363,6 @@ const styles = StyleSheet.create({
         marginTop: 24,
         marginBottom: 8,
     },
-    chevronButton: {
-        padding: 8,
-        backgroundColor: 'rgba(0,0,0,0.03)',
-        borderRadius: 20,
-        zIndex: 1,
-    },
     actionsScrollContent: {
         paddingHorizontal: 8,
     },
@@ -559,22 +506,6 @@ const styles = StyleSheet.create({
         color: '#34a853',
         fontWeight: 'bold',
         fontSize: 15,
-    },
-    verticalScrollContainer: {
-        position: 'absolute',
-        bottom: 80,
-        left: 20,
-        right: 20,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        zIndex: 100,
-    },
-    scrollFab: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     // Modal Styles
     modalContainer: {

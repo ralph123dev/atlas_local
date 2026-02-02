@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'blue';
 
 interface ThemeContextType {
     theme: Theme;
@@ -16,10 +16,3 @@ export const ThemeContext = createContext<ThemeContextType>({
     setThemeWithTransition: () => { },
 });
 
-/**
- * @Project: Atlas Local
- * @Author: Ralph <ralphurgue@gmail.com>
- * @Date: 2026-01-12
- * @Last Modified: 2026-01-24
- * @Description: Application mobile d'exploration.
- */

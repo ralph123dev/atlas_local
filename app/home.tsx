@@ -301,8 +301,8 @@ export default function HomeScreen() {
             <View style={styles.floatingHeader}>
               <View style={[styles.floatingSearchContainer, themeStyles.searchContainer, styles.shadow]}>
                 <View style={styles.searchBranding}>
-                  <Image source={require('../assets/images/logo.jpg')} style={styles.searchLogo} />
-                  <Text style={[styles.brandingText, themeStyles.text]}>Nexora</Text>
+                  <Image source={require('../assets/images/logo.png')} style={styles.searchLogo} />
+                  <Text style={[styles.brandingText, themeStyles.text]}></Text>
                 </View>
                 <View style={styles.searchDivider} />
                 <TextInput

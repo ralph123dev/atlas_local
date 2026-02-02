@@ -16,25 +16,25 @@ import TrendingScreen from './app/trending';
 import WeatherScreen from './app/weather';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-// Calculate max radius needed to cover the screen from any corner
+// Calcul du rayon maximal nécessaire pour couvrir l'écran depuis n'importe quel coin
 const MAX_RADIUS = Math.sqrt(SCREEN_WIDTH ** 2 + SCREEN_HEIGHT ** 2);
 
-// Helper for Reanimated
+// Aide pour Reanimated : retourne la couleur de fond selon le thème
 const getThemeColor = (t: Theme) => {
   'worklet';
-  return t === 'light' ? '#fff' : '#1a1a1a';
+  return t === 'light' ? '#fff' : t === 'blue' ? '#15202b' : '#1a1a1a';
 };
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState('/');
   const [theme, setTheme] = useState<Theme>('light');
 
-  // Animation states
+  // États de l'animation de transition
   const [previousTheme, setPreviousTheme] = useState<Theme>('light');
   const [isAnimating, setIsAnimating] = useState(false);
   const transitionCoords = React.useRef({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 });
 
-  // Reanimated values
+  // Valeurs Reanimated
   const rippleScale = useSharedValue(0);
 
   const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/trending', '/auth', '/saved'];
@@ -49,10 +49,10 @@ export default function App() {
     if (newTheme === theme) return;
 
     setPreviousTheme(theme);
-    setTheme(newTheme); // Change actual theme immediately behind the scene
+    setTheme(newTheme); // Mise à jour immédiate de l'état (le nouveau contenu se prépare en arrière-plan)
     transitionCoords.current = coords;
 
-    // Start animation
+    // Lancement de l'animation
     setIsAnimating(true);
     rippleScale.value = 0;
     rippleScale.value = withTiming(1, { duration: 600 }, (finished) => {
@@ -90,7 +90,7 @@ export default function App() {
   };
 
   const animatedStyle = useAnimatedStyle(() => {
-    const scale = rippleScale.value * (MAX_RADIUS / 10); // Scale up to cover screen
+    const scale = rippleScale.value * (MAX_RADIUS / 10); // Couvre tout l'écran
     return {
       top: transitionCoords.current.y - 10,
       left: transitionCoords.current.x - 10,
@@ -108,46 +108,46 @@ export default function App() {
       <ThemeContext.Provider value={{ theme, setTheme, setThemeWithTransition }}>
         <NavigationContext.Provider value={navigation}>
           <View style={{ flex: 1 }}>
-            {/* Background Layer (Previous Theme OR Current Theme if not animating) */}
+            {/* Couche de base : Ancien thème ou thème actuel si pas d'animation */}
             <View style={[styles.container, { backgroundColor: getThemeColor(isAnimating ? previousTheme : theme) }]}>
               {renderContent()}
             </View>
 
-            {/* Animation Layer (Current Theme expanding) */}
+            {/* Couche d'animation : L'onde du nouveau thème qui s'étend */}
             {isAnimating && (
               <View style={[StyleSheet.absoluteFill, { overflow: 'hidden', zIndex: 9999 }]} pointerEvents="none">
                 <Animated.View style={[styles.ripple, animatedStyle]} />
               </View>
             )}
             {/* 
-                  Note: A true "mask" of the whole app content is very hard in RN without native modules. 
-                  Here we simulated the "background color" fill. 
-                  For a true content mask, we would need to duplicate the entire app hierarchy which is too heavy.
-                  The "Telegram" effect is usually just the background color sweeping across.
-                  However, to make it seamless, we typically need the NEW content on top.
-                  Since we changed the state 'theme', the content IS new.
-                  So we actually want:
-                  1. Underlying layer: Old Theme Content (Snapshot? No, just render with old theme variable? Hard because Context updates all consumers).
+                  Note : Un vrai "masque" du contenu complet de l'application est très difficile en RN sans modules natifs. 
+                  Ici, nous simulons le remplissage par la couleur de fond. 
+                  Pour un vrai masque de contenu, nous devrions dupliquer toute la hiérarchie de l'application, ce qui est trop lourd.
+                  L'effet "Telegram" est généralement juste la couleur de fond qui balaye l'écran.
+                  Cependant, pour que ce soit fluide, nous avons normalement besoin du NOUVEAU contenu au-dessus.
+                  Puisque nous avons changé l'état 'theme', le contenu EST nouveau.
+                  Donc nous voulons en réalité :
+                  1. Couche sous-jacente : Contenu avec l'Ancien Thème (Capture ? Non, juste rendu avec la variable d'ancien thème ? Difficile car le Context met à jour tous les consommateurs).
                   
-                  Alternative Logic for smoother visual:
-                  - Context updates 'theme'. All components re-render with NEW theme colors.
-                  - Limitation: We can't easily "keep" the old render for the background.
+                  Logique alternative pour un visuel plus fluide :
+                  - Le Context met à jour 'theme'. Tous les composants se re-rendent avec les NOUVELLES couleurs du thème.
+                  - Limitation : Nous ne pouvons pas facilement "garder" l'ancien rendu pour l'arrière-plan.
                   
-                  Compromise for React Native without native snaps:
-                  - Use a full screen colored overlay for the "Ripple".
-                  - The content behind changes immediately (flash). 
+                  Compromis pour React Native sans captures natives :
+                  - Utiliser une superposition colorée en plein écran pour l'effet "Ripple" (Onde).
+                  - Le contenu derrière change immédiatement (flash). 
                   
-                  Let's try a better trick: 
-                  - We rely on the fact that the Ripple is the NEW color.
-                  - BUT, if the content is already New Color, the ripple is invisible.
+                  Essayons une meilleure astuce : 
+                  - Nous nous appuyons sur le fait que le Ripple est la NOUVELLE couleur.
+                  - MAIS, si le contenu est déjà de la Nouvelle Couleur, le ripple est invisible.
                   
-                  Wait, if we update Context, everything updates.
-                  To see the "Old" content, we would need to delaying the Context update?
+                  Attendez, si nous mettons à jour le Context, tout se met à jour.
+                  Pour voir l' "Ancien" contenu, il faudrait retarder la mise à jour du Context ?
                   
-                  Correct approach for this constraint:
-                  1. Take screenshot of current view (requires view-shot, likely not installed).
-                  2. OR: Just animate a colored circle of the NEW theme over the OLD theme, 
-                     then switch the actual theme state when animation covers screen.
+                  Approche correcte pour cette contrainte :
+                  1. Prendre une capture d'écran de la vue actuelle (nécessite view-shot, probablement pas installé).
+                  2. OU : Animer simplement un cercle coloré du NOUVEAU thème par-dessus l'ANCIEN thème, 
+                     puis changer l'état réel du thème lorsque l'animation couvre l'écran.
                */}
           </View>
         </NavigationContext.Provider>
