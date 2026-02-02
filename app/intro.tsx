@@ -1,10 +1,4 @@
-/**
- * @Project: Atlas Local
- * @Author: Ralph <ralphurgue@gmail.com>
- * @Date: 2026-01-12
- * @Last Modified: 2026-01-24
- * @Description: Application mobile d'exploration.
- */
+
 import { Package, Search, Star } from 'lucide-react-native';
 import React, { useContext } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

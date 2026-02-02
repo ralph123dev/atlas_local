@@ -52,7 +52,7 @@ export const OnboardingSlide: React.FC<Props> = ({ data }) => {
         {data.description}
       </p>
 
-      {/* Feature list for step 2 */}
+      {/* Feature list  */}
       {data.features && (
         <div className="w-full max-w-[240px] flex flex-col gap-5 mt-4">
           {data.features.map((feature, index) => (
@@ -70,10 +70,3 @@ export const OnboardingSlide: React.FC<Props> = ({ data }) => {
 };
 
 
-/**
- * @Project: Atlas Local
- * @Author: Ralph <ralphurgue@gmail.com>
- * @Date: 2026-01-12
- * @Last Modified: 2026-01-24
- * @Description: Application mobile d'exploration.
- */
