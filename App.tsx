@@ -74,20 +74,6 @@ export default function App() {
     }
   };
 
-  const renderContent = () => {
-    switch (currentPath) {
-      case '/intro': return <IntroScreen key="intro" />;
-      case '/location': return <LocationScreen key="location" />;
-      case '/home': return <HomeScreen key="home" />;
-      case '/ask': return <AskScreen key="ask" />;
-      case '/weather': return <WeatherScreen key="weather" />;
-      case '/events': return <EventsScreen key="events" />;
-      case '/trending': return <TrendingScreen key="trending" />;
-      case '/auth': return <AuthScreen key="auth" />;
-      case '/saved': return <SavedScreen key="saved" />;
-      default: return <WelcomeScreen key="welcome" />;
-    }
-  };
 
   const animatedStyle = useAnimatedStyle(() => {
     const scale = rippleScale.value * (MAX_RADIUS / 10); // Couvre tout l'écran

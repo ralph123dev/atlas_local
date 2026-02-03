@@ -12,7 +12,7 @@ const { width } = Dimensions.get('window');
 export default function TrendingScreen() {
     const { theme } = useContext(ThemeContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('menu'); // 'menu' isn't really a tab that stays active, but needed for visual if we want
+    const [activeTab, setActiveTab] = useState('menu'); 
 
     const isDark = theme === 'dark';
     const isBlue = theme === 'blue';
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 20,
-        paddingBottom: 100, // Space for bottom nav
+        paddingBottom: 100, // Space
     },
     title: {
         fontSize: 24,
