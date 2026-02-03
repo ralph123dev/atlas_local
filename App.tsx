@@ -120,34 +120,7 @@ export default function App() {
               </View>
             )}
             {/* 
-                  Note : Un vrai "masque" du contenu complet de l'application est très difficile en RN sans modules natifs. 
-                  Ici, nous simulons le remplissage par la couleur de fond. 
-                  Pour un vrai masque de contenu, nous devrions dupliquer toute la hiérarchie de l'application, ce qui est trop lourd.
-                  L'effet "Telegram" est généralement juste la couleur de fond qui balaye l'écran.
-                  Cependant, pour que ce soit fluide, nous avons normalement besoin du NOUVEAU contenu au-dessus.
-                  Puisque nous avons changé l'état 'theme', le contenu EST nouveau.
-                  Donc nous voulons en réalité :
-                  1. Couche sous-jacente : Contenu avec l'Ancien Thème (Capture ? Non, juste rendu avec la variable d'ancien thème ? Difficile car le Context met à jour tous les consommateurs).
                   
-                  Logique alternative pour un visuel plus fluide :
-                  - Le Context met à jour 'theme'. Tous les composants se re-rendent avec les NOUVELLES couleurs du thème.
-                  - Limitation : Nous ne pouvons pas facilement "garder" l'ancien rendu pour l'arrière-plan.
-                  
-                  Compromis pour React Native sans captures natives :
-                  - Utiliser une superposition colorée en plein écran pour l'effet "Ripple" (Onde).
-                  - Le contenu derrière change immédiatement (flash). 
-                  
-                  Essayons une meilleure astuce : 
-                  - Nous nous appuyons sur le fait que le Ripple est la NOUVELLE couleur.
-                  - MAIS, si le contenu est déjà de la Nouvelle Couleur, le ripple est invisible.
-                  
-                  Attendez, si nous mettons à jour le Context, tout se met à jour.
-                  Pour voir l' "Ancien" contenu, il faudrait retarder la mise à jour du Context ?
-                  
-                  Approche correcte pour cette contrainte :
-                  1. Prendre une capture d'écran de la vue actuelle (nécessite view-shot, probablement pas installé).
-                  2. OU : Animer simplement un cercle coloré du NOUVEAU thème par-dessus l'ANCIEN thème, 
-                     puis changer l'état réel du thème lorsque l'animation couvre l'écran.
                */}
           </View>
         </NavigationContext.Provider>
