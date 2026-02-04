@@ -73,6 +73,32 @@ export default function App() {
       }
     }
   };
+  const renderContent = () => {
+    switch (currentPath) {
+      case '/':
+        return <WelcomeScreen />;
+      case '/intro':
+        return <IntroScreen />;
+      case '/location':
+        return <LocationScreen />;
+      case '/home':
+        return <HomeScreen />;
+      case '/ask':
+        return <AskScreen />;
+      case '/weather':
+        return <WeatherScreen />;
+      case '/events':
+        return <EventsScreen />;
+      case '/trending':
+        return <TrendingScreen />;
+      case '/auth':
+        return <AuthScreen />;
+      case '/saved':
+        return <SavedScreen />;
+      default:
+        return <WelcomeScreen />;
+    }
+  };
 
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -88,6 +114,7 @@ export default function App() {
       opacity: 1,
     };
   });
+
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -248,7 +248,6 @@ export default function HomeScreen() {
               showsCompass={false}
               showsBuildings={true}
               showsIndoors={true}
-              mapId={isDark ? undefined : "8b8b0cea4273e8dffe2dc07d"}
               customMapStyle={isDark ? darkMapStyle : []}
               userInterfaceStyle={isDark ? 'dark' : 'light'}
               onMapReady={() => setIsMapLoading(false)}
@@ -296,7 +295,7 @@ export default function HomeScreen() {
             <View style={styles.floatingHeader}>
               <View style={[styles.floatingSearchContainer, themeStyles.searchContainer, styles.shadow]}>
                 <View style={styles.searchBranding}>
-                  <Image source={require('../assets/images/logo.png')} style={styles.searchLogo} />
+                  <Image source={require('@/assets/images/logo.png')} style={styles.searchLogo} />
                   <Text style={[styles.brandingText, themeStyles.text]}></Text>
                 </View>
                 <View style={styles.searchDivider} />
@@ -401,7 +400,7 @@ export default function HomeScreen() {
           <View style={[styles.header, themeStyles.header]}>
             <View style={styles.logoHeaderContainer}>
               <Image
-                source={require('../assets/images/logo.jpg')}
+                source={require('@/assets/images/logo.png')}
                 style={[styles.logo, { borderRadius: 8 }]}
               />
               <Text style={[styles.logoText, themeStyles.text]}>Nexora</Text>
