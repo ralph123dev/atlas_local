@@ -397,12 +397,12 @@ export default function AskScreen() {
     }
 
     return (
-        <SafeAreaView style={[styles.container, themeStyles.container]}> 
+        <SafeAreaView style={[styles.container, themeStyles.container]}>
             {/* Header spécifique Ask */}
             <View style={[styles.header, themeStyles.navBg, themeStyles.border]}>
                 <View style={styles.logoContainer}>
                     <Image
-                        source={require('@/assets/images/logo.png')}
+                        source={require('@/assets/images/premier.png')}
                         style={styles.logo}
                     />
                     <Text style={[styles.headerTitle, themeStyles.text]}>Nexora AI</Text>

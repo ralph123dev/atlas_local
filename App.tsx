@@ -12,7 +12,6 @@ import LocationScreen from './app/location';
 import { NavigationContext } from './app/NavigationContext';
 import SavedScreen from './app/saved';
 import { Theme, ThemeContext } from './app/ThemeContext';
-import TrendingScreen from './app/trending';
 import WeatherScreen from './app/weather';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -37,7 +36,7 @@ export default function App() {
   // Valeurs Reanimated
   const rippleScale = useSharedValue(0);
 
-  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/trending', '/auth', '/saved'];
+  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/auth', '/saved'];
   const currentIndex = paths.indexOf(currentPath);
 
   const navigation = {
@@ -89,8 +88,6 @@ export default function App() {
         return <WeatherScreen />;
       case '/events':
         return <EventsScreen />;
-      case '/trending':
-        return <TrendingScreen />;
       case '/auth':
         return <AuthScreen />;
       case '/saved':

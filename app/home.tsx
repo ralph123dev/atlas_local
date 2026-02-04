@@ -9,7 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { ContributeScreen } from '../components/ContributeScreen';
 import { SideMenu } from '../components/SideMenu';
-import { TrendingPanel } from '../components/TrendingPanel';
 import { styles } from '../constants/styles/Home.styles';
 import { NavigationContext } from './NavigationContext';
 import { ThemeContext } from './ThemeContext';
@@ -295,7 +294,7 @@ export default function HomeScreen() {
             <View style={styles.floatingHeader}>
               <View style={[styles.floatingSearchContainer, themeStyles.searchContainer, styles.shadow]}>
                 <View style={styles.searchBranding}>
-                  <Image source={require('@/assets/images/logo.png')} style={styles.searchLogo} />
+                  <Image source={require('@/assets/images/premier.png')} style={styles.searchLogo} />
                   <Text style={[styles.brandingText, themeStyles.text]}></Text>
                 </View>
                 <View style={styles.searchDivider} />
@@ -400,7 +399,7 @@ export default function HomeScreen() {
           <View style={[styles.header, themeStyles.header]}>
             <View style={styles.logoHeaderContainer}>
               <Image
-                source={require('@/assets/images/logo.png')}
+                source={require('@/assets/images/premier.png')}
                 style={[styles.logo, { borderRadius: 8 }]}
               />
               <Text style={[styles.logoText, themeStyles.text]}>Nexora</Text>
@@ -473,7 +472,6 @@ export default function HomeScreen() {
         </View>
 
         {/* Trending Panel Overlay */}
-        {activeTab === 'explorer' && <TrendingPanel />}
       </SafeAreaView>
     </GestureHandlerRootView>
   );

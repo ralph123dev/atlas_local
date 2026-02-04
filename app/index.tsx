@@ -24,7 +24,7 @@ export default function WelcomeScreen() {
       <View style={styles.content}>
         <View style={styles.logoContainer}>
           <View style={styles.logoBox}>
-            <Image source={require('@/assets/images/logo.png')} style={styles.logoImage} />
+            <Image source={require('@/assets/images/premier.png')} style={styles.logoImage} />
           </View>
         </View>
 

@@ -1,5 +1,5 @@
 
-import { Bookmark, Calendar, CloudSun, MapPin, Moon, Sun, X } from 'lucide-react-native';
+import { Bookmark, Calendar, CloudSun, Moon, Sun, X } from 'lucide-react-native';
 import React, { useContext, useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
@@ -67,14 +67,6 @@ export const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
             onPress: () => {
                 onClose();
                 router.push('/events');
-            }
-        },
-        {
-            icon: MapPin,
-            label: 'Tendances à proximité',
-            onPress: () => {
-                onClose();
-                router.push('/trending');
             }
         },
         {
