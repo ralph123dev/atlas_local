@@ -4,6 +4,7 @@ import { GestureHandlerRootView, State } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import AskScreen from './app/ask';
 import AuthScreen from './app/auth';
+import EventDetailScreen from './app/event-detail';
 import EventsScreen from './app/events';
 import HomeScreen from './app/home';
 import WelcomeScreen from './app/index';
@@ -26,6 +27,7 @@ const getThemeColor = (t: Theme) => {
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState('/');
+  const [currentParams, setCurrentParams] = useState<any>({});
   const [theme, setTheme] = useState<Theme>('light');
 
   // États de l'animation de transition
@@ -36,12 +38,19 @@ export default function App() {
   // Valeurs Reanimated
   const rippleScale = useSharedValue(0);
 
-  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/auth', '/saved'];
+  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/auth', '/saved', '/event-detail'];
   const currentIndex = paths.indexOf(currentPath);
 
   const navigation = {
-    push: (path: string) => setCurrentPath(path),
-    replace: (path: string) => setCurrentPath(path),
+    push: (path: string, params?: any) => {
+      if (params) setCurrentParams(params);
+      setCurrentPath(path);
+    },
+    replace: (path: string, params?: any) => {
+      if (params) setCurrentParams(params);
+      setCurrentPath(path);
+    },
+    params: currentParams,
   };
 
   const setThemeWithTransition = (newTheme: Theme, coords: { x: number; y: number }) => {
@@ -92,6 +101,8 @@ export default function App() {
         return <AuthScreen />;
       case '/saved':
         return <SavedScreen />;
+      case '/event-detail':
+        return <EventDetailScreen />;
       default:
         return <WelcomeScreen />;
     }

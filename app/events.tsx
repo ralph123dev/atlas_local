@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNavigation } from '../components/BottomNavigation';
 import { SideMenu } from '../components/SideMenu';
 import { styles } from '../constants/styles/Events.styles';
+import { NavigationContext } from './NavigationContext';
 import { ThemeContext } from './ThemeContext';
 
 interface Event {
@@ -42,6 +43,7 @@ const MOCK_EVENTS: Event[] = [
 ];
 
 export default function EventsScreen() {
+    const router = useContext(NavigationContext);
     const { theme } = useContext(ThemeContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('menu');
@@ -116,12 +118,16 @@ export default function EventsScreen() {
     const filteredEvents = events.filter(e => {
         const matchesType = selectedType === 'Tous' || e.type === selectedType;
         const matchesSearch = e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            e.location.toLowerCase().includes(searchQuery.toLowerCase());
+            e.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            e.startDate.includes(searchQuery);
         return matchesType && matchesSearch;
     });
 
     const renderEventItem = ({ item }: { item: Event }) => (
-        <TouchableOpacity style={[styles.eventCard, themeStyles.cardBg]}>
+        <TouchableOpacity
+            style={[styles.eventCard, themeStyles.cardBg]}
+            onPress={() => router.push('/event-detail', { event: item })}
+        >
             <Image source={{ uri: item.thumbnail }} style={styles.eventThumbnail} />
             <View style={styles.eventInfo}>
                 <View style={[styles.eventTag, { backgroundColor: isDark || isBlue ? 'rgba(0, 87, 183, 0.2)' : 'rgba(0, 87, 183, 0.1)' }]}>
