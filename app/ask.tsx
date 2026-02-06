@@ -69,9 +69,6 @@ export default function AskScreen() {
         }
     };
 
-    /**
-     * Envoie un message ou enregistre les modifications d'un message existant
-     */
     const handleSendMessage = () => {
         if (messageText.trim().length === 0) return;
 
