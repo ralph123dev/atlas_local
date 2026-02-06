@@ -142,4 +142,49 @@ export const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.5)',
         zIndex: 999,
     },
+    shareModal: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        padding: 24,
+        paddingBottom: 40,
+    },
+    shareTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    shareGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: 20,
+    },
+    shareOption: {
+        width: '30%',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    socialIcon: {
+        width: 50,
+        height: 50,
+        borderRadius: 12,
+        marginBottom: 8,
+    },
+    socialText: {
+        fontSize: 12,
+        fontWeight: '500',
+    },
+    submitButton: {
+        backgroundColor: '#0057b7',
+        borderRadius: 15,
+        paddingVertical: 16,
+        alignItems: 'center',
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
 });

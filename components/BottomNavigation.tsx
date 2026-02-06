@@ -31,13 +31,21 @@ export const BottomNavigation = ({ activeTab, onTabPress, isHome = true, onMenuP
         router.push('/home');
     };
 
+    const handleTabPress = (tab: string) => {
+        if (!isHome) {
+            router.push('/home', { activeTab: tab });
+        } else {
+            onTabPress(tab);
+        }
+    };
+
     return (
         <View style={[styles.bottomNav, themeStyles.navBg]}>
             {/* Tab 1: Explorer (Home) OR Back */}
             {isHome ? (
                 <TouchableOpacity
                     style={[styles.tab, activeTab === 'explorer' && [styles.activeTab, themeStyles.activeTab]]}
-                    onPress={() => onTabPress('explorer')}
+                    onPress={() => handleTabPress('explorer')}
                 >
                     <MapLucideIcon size={24} color={activeTab === 'explorer' ? themeStyles.iconActive : themeStyles.iconInactive} />
                     <Text style={[styles.tabText, themeStyles.subText, activeTab === 'explorer' && themeStyles.activeTabText]}>Explorer</Text>
@@ -76,7 +84,7 @@ export const BottomNavigation = ({ activeTab, onTabPress, isHome = true, onMenuP
             {/* Tab 4: Contribute */}
             <TouchableOpacity
                 style={[styles.tab, activeTab === 'contribute' && [styles.activeTab, themeStyles.activeTab]]}
-                onPress={() => onTabPress('contribute')}
+                onPress={() => handleTabPress('contribute')}
             >
                 <HeartHandshake size={24} color={activeTab === 'contribute' ? themeStyles.iconActive : themeStyles.iconInactive} />
                 <Text style={[styles.tabText, themeStyles.subText, activeTab === 'contribute' && themeStyles.activeTabText]}>Contribute</Text>

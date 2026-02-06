@@ -32,6 +32,7 @@ export default function EventDetailScreen() {
 
     const [isLiked, setIsLiked] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     const isDark = theme === 'dark';
     const isBlue = theme === 'blue';
@@ -58,11 +59,24 @@ export default function EventDetailScreen() {
         );
     }
 
+    const shareOptions = [
+        { label: 'Facebook', icon: require('@/assets/images/socials/facebook.png'), onPress: () => alert('Partage sur Facebook...') },
+        { label: 'Instagram', icon: require('@/assets/images/socials/instagram.png'), onPress: () => alert('Partage sur Instagram...') },
+        { label: 'WhatsApp', icon: require('@/assets/images/socials/social.png'), onPress: () => alert('Partage sur WhatsApp...') },
+        { label: 'Telegram', icon: require('@/assets/images/socials/telegram.png'), onPress: () => alert('Partage sur Telegram...') },
+        {
+            label: 'Copier', icon: require('@/assets/images/socials/link.png'), onPress: () => {
+                alert('Lien copié dans le presse-papier !');
+                setIsShareModalOpen(false);
+            }
+        },
+    ];
+
     const menuItems = [
         { label: 'Itinéraire', icon: Compass, onPress: () => { setIsMenuOpen(false); alert('Itinéraire lancé'); } },
         { label: 'Contacter', icon: MessageSquare, onPress: () => { setIsMenuOpen(false); alert('Contacter l\'organisateur'); } },
         { label: 'Calendrier', icon: Calendar, onPress: () => { setIsMenuOpen(false); alert('Ajouté au calendrier'); } },
-        { label: 'Partager', icon: Share2, onPress: () => { setIsMenuOpen(false); alert('Partager cet événement'); } },
+        { label: 'Partager', icon: Share2, onPress: () => { setIsMenuOpen(false); setIsShareModalOpen(true); } },
         { label: 'Signaler', icon: AlertTriangle, color: '#ef4444', onPress: () => { setIsMenuOpen(false); alert('Signalement envoyé'); } },
         { label: 'Retour', icon: ArrowLeft, onPress: () => { setIsMenuOpen(false); router.push('/home'); } },
     ];
@@ -108,7 +122,7 @@ export default function EventDetailScreen() {
                     <View style={styles.actionButtonsRow}>
                         <TouchableOpacity
                             style={styles.participateButton}
-                            onPress={() => alert('Participation enregistrée !')}
+                            onPress={() => alert('Vous avez été enregistré.')}
                         >
                             <Share size={20} color="#fff" />
                             <Text style={styles.participateText}>Participer</Text>
@@ -157,6 +171,43 @@ export default function EventDetailScreen() {
                                 </Text>
                             </TouchableOpacity>
                         ))}
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Share Modal */}
+            <Modal
+                visible={isShareModalOpen}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setIsShareModalOpen(false)}
+            >
+                <View style={[styles.overlay, { justifyContent: 'flex-end' }]}>
+                    <TouchableOpacity
+                        style={StyleSheet.absoluteFill}
+                        activeOpacity={1}
+                        onPress={() => setIsShareModalOpen(false)}
+                    />
+                    <View style={[styles.shareModal, themeStyles.sidebar]}>
+                        <Text style={[styles.shareTitle, themeStyles.text]}>Partager via</Text>
+                        <View style={styles.shareGrid}>
+                            {shareOptions.map((option, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    style={styles.shareOption}
+                                    onPress={option.onPress}
+                                >
+                                    <Image source={option.icon} style={styles.socialIcon} />
+                                    <Text style={[styles.socialText, themeStyles.text]}>{option.label}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                        <TouchableOpacity
+                            style={[styles.submitButton, { marginTop: 30 }]}
+                            onPress={() => setIsShareModalOpen(false)}
+                        >
+                            <Text style={styles.submitButtonText}>Annuler</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>

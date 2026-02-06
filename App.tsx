@@ -4,6 +4,7 @@ import { GestureHandlerRootView, State } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import AskScreen from './app/ask';
 import AuthScreen from './app/auth';
+import DashboardScreen from './app/dashboard';
 import EventDetailScreen from './app/event-detail';
 import EventsScreen from './app/events';
 import HomeScreen from './app/home';
@@ -38,7 +39,7 @@ export default function App() {
   // Valeurs Reanimated
   const rippleScale = useSharedValue(0);
 
-  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/auth', '/saved', '/event-detail'];
+  const paths = ['/', '/intro', '/location', '/home', '/ask', '/weather', '/events', '/auth', '/saved', '/event-detail', '/dashboard'];
   const currentIndex = paths.indexOf(currentPath);
 
   const navigation = {
@@ -103,6 +104,8 @@ export default function App() {
         return <SavedScreen />;
       case '/event-detail':
         return <EventDetailScreen />;
+      case '/dashboard':
+        return <DashboardScreen />;
       default:
         return <WelcomeScreen />;
     }

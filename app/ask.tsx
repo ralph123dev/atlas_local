@@ -402,7 +402,7 @@ export default function AskScreen() {
             <View style={[styles.header, themeStyles.navBg, themeStyles.border]}>
                 <View style={styles.logoContainer}>
                     <Image
-                        source={require('@/assets/images/premier.png')}
+                        source={require('@/assets/images/N.png')}
                         style={styles.logo}
                     />
                     <Text style={[styles.headerTitle, themeStyles.text]}>Nexora AI</Text>

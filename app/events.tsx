@@ -166,7 +166,10 @@ export default function EventsScreen() {
                     <Text style={[styles.buttonText, styles.createText]}>Créer</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.headerButton, styles.dashboardButton, { backgroundColor: isDark || isBlue ? '#333' : '#f3f4f6' }]}>
+                <TouchableOpacity
+                    style={[styles.headerButton, styles.dashboardButton, { backgroundColor: isDark || isBlue ? '#333' : '#f3f4f6' }]}
+                    onPress={() => router.push('/dashboard')}
+                >
                     <LayoutDashboard size={20} color={isDark || isBlue ? '#fff' : '#1a1a1a'} />
                     <Text style={[styles.buttonText, isDark || isBlue ? styles.createText : styles.dashboardText]}>Tableau de bord</Text>
                 </TouchableOpacity>
@@ -176,7 +179,6 @@ export default function EventsScreen() {
             <View style={[styles.filterSection, themeStyles.header]}>
                 <View style={{ paddingHorizontal: 16, marginBottom: 12 }}>
                     <View style={[styles.input, themeStyles.inputBg, { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 }]}>
-                        <Search size={18} color={themeStyles.subText.color} />
                         <TextInput
                             style={{ flex: 1, color: themeStyles.text.color }}
                             placeholder="Rechercher par lieu ou date..."

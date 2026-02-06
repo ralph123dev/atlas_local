@@ -1,8 +1,9 @@
 
-import { Bookmark, ChevronLeft, Heart, HeartHandshake, Map as MapLucideIcon, MapPin, MessageCircleQuestion, Plus, Stars } from 'lucide-react-native';
+import { Bookmark, ChevronLeft, Heart, MapPin, Plus, Stars } from 'lucide-react-native';
 import React, { useContext } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BottomNavigation } from '../components/BottomNavigation';
 import { NavigationContext } from './NavigationContext';
 import { ThemeContext } from './ThemeContext';
 
@@ -72,30 +73,12 @@ export default function SavedScreen() {
             </ScrollView>
 
             {/* Bottom Navigation */}
-            <View style={[styles.bottomNav, themeStyles.navBg]}>
-                <TouchableOpacity style={styles.tab} onPress={() => router.push('/home')}>
-                    <MapLucideIcon size={24} color={themeStyles.iconInactive} />
-                    <Text style={[styles.tabText, themeStyles.subText]}>Explorer</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.tab} onPress={() => router.push('/home')}>
-                    <Image
-                        source={require('../assets/images/more.png')}
-                        style={[styles.menuIcon, { tintColor: themeStyles.iconInactive }]}
-                    />
-                    <Text style={[styles.tabText, themeStyles.subText]}>Menu</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.tab} onPress={() => router.push('/ask')}>
-                    <MessageCircleQuestion size={24} color={themeStyles.iconInactive} />
-                    <Text style={[styles.tabText, themeStyles.subText]}>Ask</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.tab} onPress={() => router.push('/home')}>
-                    <HeartHandshake size={24} color={themeStyles.iconInactive} />
-                    <Text style={[styles.tabText, themeStyles.subText]}>Contribute</Text>
-                </TouchableOpacity>
-            </View>
+            <BottomNavigation
+                activeTab="saved"
+                onTabPress={() => { }}
+                isHome={false}
+                onMenuPress={() => { }}
+            />
         </SafeAreaView>
     );
 }
