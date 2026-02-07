@@ -1,10 +1,12 @@
-
 import * as ExpoLocation from 'expo-location';
-import { Coffee, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, Trees, User, Utensils, X } from 'lucide-react-native';
+import { Banknote, Cloud, Coffee, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, ShoppingBag, Trees, User, Utensils, X } from 'lucide-react-native';
+
+
 import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ActivityIndicator, Dimensions, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { ContributeScreen } from '../components/ContributeScreen';
@@ -13,16 +15,89 @@ import { styles } from '../constants/styles/Home.styles';
 import { NavigationContext } from './NavigationContext';
 import { ThemeContext } from './ThemeContext';
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const SHEET_MIN_HEIGHT = 120;
+const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.8;
+
+const categories_data = {
+  hotels: [
+    { id: 1, name: 'Hôtel Splendide', distance: 120, price: '45.000', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400' },
+    { id: 2, name: 'Auberge du Lac', distance: 450, price: '25.000', image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400' },
+    { id: 3, name: 'Plaza Hotel', distance: 800, price: '60.000', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400' },
+    { id: 4, name: 'Grand Horizon', distance: 1200, price: '35.000', image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400' },
+    { id: 5, name: 'Ocean View', distance: 1500, price: '50.000', image: 'https://images.unsplash.com/photo-1551882547-ff43c63efe8c?w=400' },
+    { id: 6, name: 'City Center Inn', distance: 2000, price: '20.000', image: 'https://images.unsplash.com/photo-1445013544690-d303e898435d?w=400' },
+    { id: 7, name: 'Royal Palace', distance: 2500, price: '85.000', image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400' },
+    { id: 8, name: 'Nomad Lodge', distance: 3000, price: '15.000', image: 'https://images.unsplash.com/photo-1495365200463-6c74768ec287?w=400' },
+  ],
+  restaurants: [
+    { id: 1, name: 'Chez Mamy', distance: 50, price: '5.000', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400' },
+    { id: 2, name: 'Le Gourmet', distance: 200, price: '12.000', image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400' },
+    { id: 3, name: 'Pasta Fina', distance: 400, price: '8.500', image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400' },
+    { id: 4, name: 'Grill Master', distance: 750, price: '10.000', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400' },
+    { id: 5, name: 'Sushi Zen', distance: 900, price: '15.000', image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400' },
+    { id: 6, name: 'Burger King', distance: 1100, price: '4.500', image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400' },
+    { id: 7, name: 'Vegan Delight', distance: 1300, price: '9.000', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400' },
+    { id: 8, name: 'Tacos Local', distance: 1600, price: '3.000', image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400' },
+  ],
+  supermarkets: [
+    { id: 1, name: 'Carrefour Market', distance: 300, price: 'Promo', image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=400' },
+    { id: 2, name: 'Super U', distance: 600, price: 'Fresh', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400' },
+    { id: 3, name: 'Casino', distance: 1000, price: 'Bio', image: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=400' },
+    { id: 4, name: 'Boulangerie Local', distance: 100, price: 'Pains', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400' },
+    { id: 5, name: 'Marché Central', distance: 1500, price: 'Vrac', image: 'https://images.unsplash.com/photo-1488459711612-071ef29946b9?w=400' },
+  ],
+  banks: [
+    { id: 1, name: 'Société Générale', distance: 250, price: 'Banque', image: 'https://images.unsplash.com/photo-1541354451442-952c97f3f18e?w=400' },
+    { id: 2, name: 'Eco Bank', distance: 500, price: 'ATM', image: 'https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?w=400' },
+    { id: 3, name: 'UBA', distance: 900, price: 'Transfert', image: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=400' },
+    { id: 4, name: 'Afriland First Bank', distance: 1200, price: 'Crédit', image: 'https://images.unsplash.com/photo-1454165833767-131ef24896c3?w=400' },
+  ]
+};
+
 export default function HomeScreen() {
   const router = useContext(NavigationContext);
   const { theme } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState('explorer');
+
+  // BottomSheet Logic
+  const translateY = useSharedValue(SCREEN_HEIGHT - SHEET_MIN_HEIGHT);
+  const context = useSharedValue({ y: 0 });
+
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      context.value = { y: translateY.value };
+    })
+    .onUpdate((event) => {
+      let nextValue = context.value.y + event.translationY;
+      if (nextValue < SCREEN_HEIGHT - SHEET_MAX_HEIGHT) {
+        nextValue = SCREEN_HEIGHT - SHEET_MAX_HEIGHT - (SCREEN_HEIGHT - SHEET_MAX_HEIGHT - nextValue) * 0.2;
+      }
+      if (nextValue > SCREEN_HEIGHT - 40) {
+        nextValue = SCREEN_HEIGHT - 40 + (nextValue - (SCREEN_HEIGHT - 40)) * 0.2;
+      }
+      translateY.value = nextValue;
+    })
+    .onEnd((event) => {
+      if (event.velocityY < -500 || translateY.value < SCREEN_HEIGHT - SHEET_MAX_HEIGHT / 2) {
+        translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 15 });
+      } else {
+        translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MIN_HEIGHT, { damping: 15 });
+      }
+    });
+
+  const animatedSheetStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }],
+    };
+  });
 
   useEffect(() => {
     if (router.params?.activeTab) {
       setActiveTab(router.params.activeTab);
     }
   }, [router.params?.activeTab]);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMapLoading, setIsMapLoading] = useState(true);
   const isDark = theme === 'dark';
@@ -229,6 +304,8 @@ export default function HomeScreen() {
     iconInactive: isDark ? '#9ca3af' : '#6b7280',
     iconPrimary: isDark ? '#f3f4f6' : '#1a1a1a',
     border: { borderBottomColor: isDark ? '#374151' : '#f3f4f6' },
+    card: { backgroundColor: isDark ? '#1a1a1a' : '#fff' },
+    progressBarFill: isDark ? '#60a5fa' : '#0057b7',
   };
 
   const renderContent = () => {
@@ -434,51 +511,178 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <View style={styles.content}>
+        {/* Main Content Area */}
+        <View style={[styles.content, { flex: 1 }]}>
           {renderContent()}
         </View>
-
-
-
-        <View style={[styles.bottomNav, themeStyles.navBg]}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'explorer' && [styles.activeTab, themeStyles.activeTab]]}
-            onPress={() => setActiveTab('explorer')}
-          >
-            <MapLucideIcon size={24} color={activeTab === 'explorer' ? themeStyles.iconActive : themeStyles.iconInactive} />
-            <Text style={[styles.tabText, themeStyles.subText, activeTab === 'explorer' && [styles.activeTabText, themeStyles.activeTabText]]}>Explorer</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'menu' && [styles.activeTab, themeStyles.activeTab]]}
-            onPress={() => setIsMenuOpen(true)}
-          >
-            <Image
-              source={require('../assets/images/more.png')}
-              style={[styles.menuIcon, { tintColor: activeTab === 'menu' ? themeStyles.iconActive : themeStyles.iconInactive }]}
-            />
-            <Text style={[styles.tabText, themeStyles.subText, activeTab === 'menu' && [styles.activeTabText, themeStyles.activeTabText]]}>Menu</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.tab}
-            onPress={() => router.push('/ask')}
-          >
-            <MessageCircleQuestion size={24} color={themeStyles.iconInactive} />
-            <Text style={[styles.tabText, themeStyles.subText]}>Ask</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'contribute' && [styles.activeTab, themeStyles.activeTab]]}
-            onPress={() => setActiveTab('contribute')}
-          >
-            <HeartHandshake size={24} color={activeTab === 'contribute' ? themeStyles.iconActive : themeStyles.iconInactive} />
-            <Text style={[styles.tabText, themeStyles.subText, activeTab === 'contribute' && [styles.activeTabText, themeStyles.activeTabText]]}>Contribute</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Trending Panel Overlay */}
       </SafeAreaView>
+
+      {/* Persistent Bottom Sheet Explorer Overlay */}
+      {activeTab === 'explorer' && (
+        <GestureDetector gesture={panGesture}>
+          <Animated.View style={[
+            styles.bottomSheet,
+            themeStyles.card,
+            animatedSheetStyle,
+            { zIndex: 1000, bottom: 0 }
+          ]}>
+            {/* Grabber Area - Pull up/down here primarily */}
+            <View style={styles.sheetHandleContainer}>
+              <View style={styles.sheetHandle} />
+            </View>
+
+            {/* Weather Header */}
+            <View style={styles.sheetHeader}>
+              <Text style={[styles.sheetCityName, themeStyles.text]}>Yaoundé, Cameroun</Text>
+              <View style={styles.weatherInfo}>
+                <Cloud size={24} color={isDark ? '#60a5fa' : '#0057b7'} />
+                <Text style={[styles.temperatureText, themeStyles.text]}>23°C</Text>
+              </View>
+            </View>
+
+            {/* Scrollable Content */}
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{ paddingBottom: 140 }}
+              showsVerticalScrollIndicator={false}
+            // This is crucial: the pan gesture on the parent might block scroll if not coordinated.
+            // In this case, we rely on the parent Pan gesture. 
+            // To allow scrolling, we ensure the translateY is at max height.
+            >
+              <View style={styles.sheetContent}>
+                {/* Hotels Section */}
+                <View style={styles.sectionHeader}>
+                  <Hotel size={20} color={themeStyles.iconActive} />
+                  <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Hôtels à proximité</Text>
+                </View>
+                {categories_data.hotels.map((hotel) => (
+                  <View key={`hotel-${hotel.id}`} style={styles.listItem}>
+                    <View style={styles.itemImageContainer}>
+                      <Image source={{ uri: hotel.image }} style={styles.itemImage} />
+                      <View style={styles.priceBadge}>
+                        <Text style={styles.priceText}>{hotel.price} FCFA</Text>
+                      </View>
+                    </View>
+                    <View style={styles.itemInfo}>
+                      <Text style={[styles.itemName, themeStyles.text]}>{hotel.name}</Text>
+                      <Text style={[styles.itemDistance, themeStyles.subText]}>{hotel.distance}m de vous</Text>
+                    </View>
+                  </View>
+                ))}
+
+                {/* Restaurants Section */}
+                <View style={styles.sectionHeader}>
+                  <Utensils size={20} color={themeStyles.iconActive} />
+                  <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Restaurants populaires</Text>
+                </View>
+                {categories_data.restaurants.map((res) => (
+                  <View key={`res-${res.id}`} style={styles.listItem}>
+                    <View style={styles.itemImageContainer}>
+                      <Image source={{ uri: res.image }} style={styles.itemImage} />
+                      <View style={styles.priceBadge}>
+                        <Text style={styles.priceText}>{res.price} FCFA</Text>
+                      </View>
+                    </View>
+                    <View style={styles.itemInfo}>
+                      <Text style={[styles.itemName, themeStyles.text]}>{res.name}</Text>
+                      <Text style={[styles.itemDistance, themeStyles.subText]}>{res.distance}m de vous</Text>
+                    </View>
+                  </View>
+                ))}
+
+                {/* Supermarkets Section */}
+                <View style={styles.sectionHeader}>
+                  <ShoppingBag size={20} color={themeStyles.iconActive} />
+                  <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Super Marchés & Boutiques</Text>
+                </View>
+                {categories_data.supermarkets.map((m) => (
+                  <View key={`shop-${m.id}`} style={styles.listItem}>
+                    <View style={styles.itemImageContainer}>
+                      <Image source={{ uri: m.image }} style={styles.itemImage} />
+                      <View style={styles.priceBadge}>
+                        <Text style={styles.priceText}>{m.price}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.itemInfo}>
+                      <Text style={[styles.itemName, themeStyles.text]}>{m.name}</Text>
+                      <Text style={[styles.itemDistance, themeStyles.subText]}>{m.distance}m de vous</Text>
+                    </View>
+                  </View>
+                ))}
+
+                {/* Banks Section */}
+                <View style={styles.sectionHeader}>
+                  <Banknote size={20} color={themeStyles.iconActive} />
+                  <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Banques & Distributeurs</Text>
+                </View>
+                {categories_data.banks.map((b) => (
+                  <View key={`bank-${b.id}`} style={styles.listItem}>
+                    <View style={styles.itemImageContainer}>
+                      <Image source={{ uri: b.image }} style={styles.itemImage} />
+                      <View style={styles.priceBadge}>
+                        <Text style={styles.priceText}>{b.price}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.itemInfo}>
+                      <Text style={[styles.itemName, themeStyles.text]}>{b.name}</Text>
+                      <Text style={[styles.itemDistance, themeStyles.subText]}>{b.distance}m de vous</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+          </Animated.View>
+        </GestureDetector>
+      )}
+
+      {/* Navigation Bar - Always on front/bottom */}
+      <View style={[styles.bottomNav, themeStyles.navBg, {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 2000,
+        backgroundColor: isDark ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+        borderTopWidth: 1,
+        borderTopColor: isDark ? '#374151' : '#f3f4f6',
+        height: 75,
+        paddingBottom: 20
+      }]}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'explorer' && [styles.activeTab, themeStyles.activeTab]]}
+          onPress={() => setActiveTab('explorer')}
+        >
+          <MapLucideIcon size={24} color={activeTab === 'explorer' ? themeStyles.iconActive : themeStyles.iconInactive} />
+          <Text style={[styles.tabText, themeStyles.subText, activeTab === 'explorer' && [styles.activeTabText, themeStyles.activeTabText]]}>Explorer</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'menu' && [styles.activeTab, themeStyles.activeTab]]}
+          onPress={() => setIsMenuOpen(true)}
+        >
+          <Image
+            source={require('../assets/images/more.png')}
+            style={[styles.menuIcon, { tintColor: activeTab === 'menu' ? themeStyles.iconActive : themeStyles.iconInactive }]}
+          />
+          <Text style={[styles.tabText, themeStyles.subText, activeTab === 'menu' && [styles.activeTabText, themeStyles.activeTabText]]}>Menu</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => router.push('/ask')}
+        >
+          <MessageCircleQuestion size={24} color={themeStyles.iconInactive} />
+          <Text style={[styles.tabText, themeStyles.subText]}>Ask</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'contribute' && [styles.activeTab, themeStyles.activeTab]]}
+          onPress={() => setActiveTab('contribute')}
+        >
+          <HeartHandshake size={24} color={activeTab === 'contribute' ? themeStyles.iconActive : themeStyles.iconInactive} />
+          <Text style={[styles.tabText, themeStyles.subText, activeTab === 'contribute' && [styles.activeTabText, themeStyles.activeTabText]]}>Contribute</Text>
+        </TouchableOpacity>
+      </View>
     </GestureHandlerRootView>
   );
 }
