@@ -365,4 +365,33 @@ export const styles = StyleSheet.create({
         flex: 1,
         paddingBottom: 20,
     },
+    categorySelector: {
+        flexDirection: 'row',
+        marginBottom: 15,
+        paddingBottom: 5,
+    },
+    categoryBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        backgroundColor: '#f3f4f6',
+        marginRight: 10,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+    },
+    categoryBtnActive: {
+        backgroundColor: '#0057b7',
+        borderColor: '#0057b7',
+    },
+    categoryBtnText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#4b5563',
+        marginLeft: 6,
+    },
+    categoryBtnTextActive: {
+        color: '#fff',
+    },
 });

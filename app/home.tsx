@@ -115,6 +115,7 @@ export default function HomeScreen() {
   const [places, setPlaces] = useState<any[]>([]);
   const [streetViewCoords, setStreetViewCoords] = useState<{ latitude: number, longitude: number } | null>(null);
   const [isStreetViewVisible, setIsStreetViewVisible] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'hotels' | 'restaurants' | 'supermarkets' | 'banks'>('all');
   const GOOGLE_API_KEY = "AIzaSyAOAGJB7TlVNo01s0-zVx_ObVRCkivqaNs";
 
   useEffect(() => {
@@ -306,6 +307,8 @@ export default function HomeScreen() {
     border: { borderBottomColor: isDark ? '#374151' : '#f3f4f6' },
     card: { backgroundColor: isDark ? '#1a1a1a' : '#fff' },
     progressBarFill: isDark ? '#60a5fa' : '#0057b7',
+    categoryBtn: { backgroundColor: isDark ? '#374151' : '#f3f4f6', borderColor: isDark ? '#4b5563' : '#e5e7eb' },
+    categoryBtnText: { color: isDark ? '#9ca3af' : '#4b5563' },
   };
 
   const renderContent = () => {
@@ -540,6 +543,41 @@ export default function HomeScreen() {
               </View>
             </View>
 
+            {/* Category Selector Buttons */}
+            <View style={{ paddingBottom: 10 }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categorySelector}
+                contentContainerStyle={{ paddingHorizontal: 5 }}
+              >
+                {[
+                  { id: 'all', label: 'Tout', icon: MapLucideIcon },
+                  { id: 'hotels', label: 'Hôtels', icon: Hotel },
+                  { id: 'restaurants', label: 'Restaurants', icon: Utensils },
+                  { id: 'supermarkets', label: 'Magasins', icon: ShoppingBag },
+                  { id: 'banks', label: 'Banques', icon: Banknote },
+                ].map((cat) => (
+                  <TouchableOpacity
+                    key={cat.id}
+                    style={[
+                      styles.categoryBtn,
+                      themeStyles.categoryBtn,
+                      selectedCategory === cat.id && styles.categoryBtnActive
+                    ]}
+                    onPress={() => setSelectedCategory(cat.id as any)}
+                  >
+                    <cat.icon size={16} color={selectedCategory === cat.id ? '#fff' : (isDark ? '#9ca3af' : '#4b5563')} />
+                    <Text style={[
+                      styles.categoryBtnText,
+                      themeStyles.categoryBtnText,
+                      selectedCategory === cat.id && styles.categoryBtnTextActive
+                    ]}>{cat.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
             {/* Scrollable Content */}
             <ScrollView
               style={{ flex: 1 }}
@@ -551,84 +589,100 @@ export default function HomeScreen() {
             >
               <View style={styles.sheetContent}>
                 {/* Hotels Section */}
-                <View style={styles.sectionHeader}>
-                  <Hotel size={20} color={themeStyles.iconActive} />
-                  <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Hôtels à proximité</Text>
-                </View>
-                {categories_data.hotels.map((hotel) => (
-                  <View key={`hotel-${hotel.id}`} style={styles.listItem}>
-                    <View style={styles.itemImageContainer}>
-                      <Image source={{ uri: hotel.image }} style={styles.itemImage} />
-                      <View style={styles.priceBadge}>
-                        <Text style={styles.priceText}>{hotel.price} FCFA</Text>
+                {(selectedCategory === 'all' || selectedCategory === 'hotels') && (
+                  <>
+                    <View style={styles.sectionHeader}>
+                      <Hotel size={20} color={themeStyles.iconActive} />
+                      <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Hôtels à proximité</Text>
+                    </View>
+                    {categories_data.hotels.map((hotel) => (
+                      <View key={`hotel-${hotel.id}`} style={styles.listItem}>
+                        <View style={styles.itemImageContainer}>
+                          <Image source={{ uri: hotel.image }} style={styles.itemImage} />
+                          <View style={styles.priceBadge}>
+                            <Text style={styles.priceText}>{hotel.price} FCFA</Text>
+                          </View>
+                        </View>
+                        <View style={styles.itemInfo}>
+                          <Text style={[styles.itemName, themeStyles.text]}>{hotel.name}</Text>
+                          <Text style={[styles.itemDistance, themeStyles.subText]}>{hotel.distance}m de vous</Text>
+                        </View>
                       </View>
-                    </View>
-                    <View style={styles.itemInfo}>
-                      <Text style={[styles.itemName, themeStyles.text]}>{hotel.name}</Text>
-                      <Text style={[styles.itemDistance, themeStyles.subText]}>{hotel.distance}m de vous</Text>
-                    </View>
-                  </View>
-                ))}
+                    ))}
+                  </>
+                )}
 
                 {/* Restaurants Section */}
-                <View style={styles.sectionHeader}>
-                  <Utensils size={20} color={themeStyles.iconActive} />
-                  <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Restaurants populaires</Text>
-                </View>
-                {categories_data.restaurants.map((res) => (
-                  <View key={`res-${res.id}`} style={styles.listItem}>
-                    <View style={styles.itemImageContainer}>
-                      <Image source={{ uri: res.image }} style={styles.itemImage} />
-                      <View style={styles.priceBadge}>
-                        <Text style={styles.priceText}>{res.price} FCFA</Text>
+                {(selectedCategory === 'all' || selectedCategory === 'restaurants') && (
+                  <>
+                    <View style={styles.sectionHeader}>
+                      <Utensils size={20} color={themeStyles.iconActive} />
+                      <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Restaurants populaires</Text>
+                    </View>
+                    {categories_data.restaurants.map((res) => (
+                      <View key={`res-${res.id}`} style={styles.listItem}>
+                        <View style={styles.itemImageContainer}>
+                          <Image source={{ uri: res.image }} style={styles.itemImage} />
+                          <View style={styles.priceBadge}>
+                            <Text style={styles.priceText}>{res.price} FCFA</Text>
+                          </View>
+                        </View>
+                        <View style={styles.itemInfo}>
+                          <Text style={[styles.itemName, themeStyles.text]}>{res.name}</Text>
+                          <Text style={[styles.itemDistance, themeStyles.subText]}>{res.distance}m de vous</Text>
+                        </View>
                       </View>
-                    </View>
-                    <View style={styles.itemInfo}>
-                      <Text style={[styles.itemName, themeStyles.text]}>{res.name}</Text>
-                      <Text style={[styles.itemDistance, themeStyles.subText]}>{res.distance}m de vous</Text>
-                    </View>
-                  </View>
-                ))}
+                    ))}
+                  </>
+                )}
 
                 {/* Supermarkets Section */}
-                <View style={styles.sectionHeader}>
-                  <ShoppingBag size={20} color={themeStyles.iconActive} />
-                  <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Super Marchés & Boutiques</Text>
-                </View>
-                {categories_data.supermarkets.map((m) => (
-                  <View key={`shop-${m.id}`} style={styles.listItem}>
-                    <View style={styles.itemImageContainer}>
-                      <Image source={{ uri: m.image }} style={styles.itemImage} />
-                      <View style={styles.priceBadge}>
-                        <Text style={styles.priceText}>{m.price}</Text>
+                {(selectedCategory === 'all' || selectedCategory === 'supermarkets') && (
+                  <>
+                    <View style={styles.sectionHeader}>
+                      <ShoppingBag size={20} color={themeStyles.iconActive} />
+                      <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Super Marchés & Boutiques</Text>
+                    </View>
+                    {categories_data.supermarkets.map((m) => (
+                      <View key={`shop-${m.id}`} style={styles.listItem}>
+                        <View style={styles.itemImageContainer}>
+                          <Image source={{ uri: m.image }} style={styles.itemImage} />
+                          <View style={styles.priceBadge}>
+                            <Text style={styles.priceText}>{m.price}</Text>
+                          </View>
+                        </View>
+                        <View style={styles.itemInfo}>
+                          <Text style={[styles.itemName, themeStyles.text]}>{m.name}</Text>
+                          <Text style={[styles.itemDistance, themeStyles.subText]}>{m.distance}m de vous</Text>
+                        </View>
                       </View>
-                    </View>
-                    <View style={styles.itemInfo}>
-                      <Text style={[styles.itemName, themeStyles.text]}>{m.name}</Text>
-                      <Text style={[styles.itemDistance, themeStyles.subText]}>{m.distance}m de vous</Text>
-                    </View>
-                  </View>
-                ))}
+                    ))}
+                  </>
+                )}
 
                 {/* Banks Section */}
-                <View style={styles.sectionHeader}>
-                  <Banknote size={20} color={themeStyles.iconActive} />
-                  <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Banques & Distributeurs</Text>
-                </View>
-                {categories_data.banks.map((b) => (
-                  <View key={`bank-${b.id}`} style={styles.listItem}>
-                    <View style={styles.itemImageContainer}>
-                      <Image source={{ uri: b.image }} style={styles.itemImage} />
-                      <View style={styles.priceBadge}>
-                        <Text style={styles.priceText}>{b.price}</Text>
+                {(selectedCategory === 'all' || selectedCategory === 'banks') && (
+                  <>
+                    <View style={styles.sectionHeader}>
+                      <Banknote size={20} color={themeStyles.iconActive} />
+                      <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Banques & Distributeurs</Text>
+                    </View>
+                    {categories_data.banks.map((b) => (
+                      <View key={`bank-${b.id}`} style={styles.listItem}>
+                        <View style={styles.itemImageContainer}>
+                          <Image source={{ uri: b.image }} style={styles.itemImage} />
+                          <View style={styles.priceBadge}>
+                            <Text style={styles.priceText}>{b.price}</Text>
+                          </View>
+                        </View>
+                        <View style={styles.itemInfo}>
+                          <Text style={[styles.itemName, themeStyles.text]}>{b.name}</Text>
+                          <Text style={[styles.itemDistance, themeStyles.subText]}>{b.distance}m de vous</Text>
+                        </View>
                       </View>
-                    </View>
-                    <View style={styles.itemInfo}>
-                      <Text style={[styles.itemName, themeStyles.text]}>{b.name}</Text>
-                      <Text style={[styles.itemDistance, themeStyles.subText]}>{b.distance}m de vous</Text>
-                    </View>
-                  </View>
-                ))}
+                    ))}
+                  </>
+                )}
               </View>
             </ScrollView>
           </Animated.View>
