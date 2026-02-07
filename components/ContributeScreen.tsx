@@ -1,7 +1,7 @@
-
-import { Award, Camera, Check, Edit3, MapPin, MessageSquare, Navigation, PlusCircle, X } from 'lucide-react-native';
+import { Award, BookOpen, Briefcase, Camera, Check, ChevronDown, Edit3, Globe, Heart, Home, Image as ImageIcon, MapPin, MessageSquare, Navigation, Phone, PlusCircle, Send, Trash2, Utensils, X } from 'lucide-react-native';
 import React, { useContext, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { ThemeContext } from '../app/ThemeContext';
 
 export const ContributeScreen = () => {
@@ -16,6 +16,7 @@ export const ContributeScreen = () => {
         divider: { backgroundColor: isDark ? '#374151' : '#e5e7eb' },
         progressBarBg: isDark ? '#4b5563' : '#e6e6e6',
         progressBarFill: isDark ? '#60a5fa' : '#0057b7',
+        iconActive: isDark ? '#60a5fa' : '#0057b7',
     };
 
     const userProfile = {
@@ -51,10 +52,132 @@ export const ContributeScreen = () => {
     const [questionResponse, setQuestionResponse] = useState('');
     const scrollRef = useRef<ScrollView>(null);
     const mainScrollRef = useRef<ScrollView>(null);
+    const [isAddPlaceVisible, setIsAddPlaceVisible] = useState(false);
+    const [isCategoryPickerVisible, setIsCategoryPickerVisible] = useState(false);
+    const [placeData, setPlaceData] = useState({
+        name: '',
+        category: 'Sélectionner une catégorie',
+        userAddress: '',
+        phone: '',
+        website: '',
+        image: null as string | null
+    });
+
+    const [isAddReviewVisible, setIsAddReviewVisible] = useState(false);
+    const [reviewData, setReviewData] = useState({
+        placeName: '',
+        review: ''
+    });
+
+    const [isAddPhotoVisible, setIsAddPhotoVisible] = useState(false);
+    const [isCameraActive, setIsCameraActive] = useState(false);
+    const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+    const [photoComment, setPhotoComment] = useState('');
+
+    const categories = [
+        { name: 'Restaurant', icon: Utensils },
+        { name: 'Magasin', icon: Briefcase },
+        { name: 'Hôtel', icon: Home },
+        { name: 'Religion', icon: Heart },
+        { name: 'Parc', icon: MapPin },
+        { name: 'École', icon: BookOpen },
+        { name: 'Santé', icon: Heart },
+        { name: 'Finance', icon: Briefcase },
+        { name: 'Autre', icon: PlusCircle }
+    ];
+
+    const isFormValid = placeData.name.trim() !== '' && placeData.category !== 'Sélectionner une catégorie';
+    const isReviewValid = reviewData.placeName.trim() !== '' && reviewData.review.trim() !== '';
+    const isPhotoValid = capturedPhoto !== null;
+
+    const handleAddPlacePress = () => {
+        setIsAddPlaceVisible(true);
+    };
+
+    const handleSelectCategory = (cat: string) => {
+        setPlaceData({ ...placeData, category: cat });
+        setIsCategoryPickerVisible(false);
+    };
+
+    const handleSubmitPlace = () => {
+        if (!placeData.name || placeData.category === 'Sélectionner une catégorie') {
+            Alert.alert("Erreur", "Veuillez remplir au moins le nom et la catégorie.");
+            return;
+        }
+        setIsPublishing(true);
+        setTimeout(() => {
+            setIsPublishing(false);
+            setIsAddPlaceVisible(false);
+            setPlaceData({
+                name: '',
+                category: 'Sélectionner une catégorie',
+                userAddress: '',
+                phone: '',
+                website: '',
+                image: null
+            });
+            Alert.alert("Succès", "Le lieu a été ajouté avec succès !");
+        }, 1500);
+    };
+
+    const handleAddReviewPress = () => {
+        setIsAddReviewVisible(true);
+    };
+
+    const handleSubmitReview = () => {
+        if (!reviewData.placeName || !reviewData.review) {
+            Alert.alert("Erreur", "Veuillez entrer le nom du lieu et votre avis.");
+            return;
+        }
+        setIsPublishing(true);
+        setTimeout(() => {
+            setIsPublishing(false);
+            setIsAddReviewVisible(false);
+            setReviewData({ placeName: '', review: '' });
+            Alert.alert("Succès", "Votre avis a été publié avec succès !");
+        }, 1500);
+    };
+
+    const handleAddPhotoActionPress = () => {
+        Alert.alert(
+            "Autorisation",
+            "Nexora souhaite accéder à votre appareil photo pour prendre des photos des lieux.",
+            [
+                { text: "Refuser", style: "cancel" },
+                {
+                    text: "Accepter", onPress: () => {
+                        setIsAddPhotoVisible(true);
+                        setIsCameraActive(true);
+                        setCapturedPhoto(null);
+                        setPhotoComment('');
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleCapturePhoto = () => {
+        // Mock capture - use a random image from picsum
+        const mockPhoto = `https://picsum.photos/800/600?random=${Date.now()}`;
+        setCapturedPhoto(mockPhoto);
+        setIsCameraActive(false);
+    };
+
+    const handleSubmitPhoto = () => {
+        if (!capturedPhoto) return;
+        setIsPublishing(true);
+        setTimeout(() => {
+            setIsPublishing(false);
+            setIsAddPhotoVisible(false);
+            setCapturedPhoto(null);
+            setPhotoComment('');
+            Alert.alert("Succès", "Votre photo a été postée avec succès !");
+        }, 1500);
+    };
 
     const handleTaskPress = (taskId: number) => {
         if (taskId === 1) { // Publier photos
-            setIsGalleryVisible(true);
+            handleAddPhotoActionPress();
         } else if (taskId === 3) { // Répondre à des questions
             setIsQuestionModalVisible(true);
         }
@@ -120,7 +243,15 @@ export const ContributeScreen = () => {
                         contentContainerStyle={styles.actionsScrollContent}
                     >
                         {actionButtons.map((btn, index) => (
-                            <TouchableOpacity key={index} style={styles.actionButton}>
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.actionButton}
+                                onPress={() => {
+                                    if (btn.label === 'Ajouter un lieu') handleAddPlacePress();
+                                    else if (btn.label === 'Ajouter un avis') handleAddReviewPress();
+                                    else if (btn.label === 'Ajouter une photo') handleAddPhotoActionPress();
+                                }}
+                            >
                                 <View style={[styles.actionIconContainer, themeStyles.card, styles.shadow]}>
                                     <btn.icon size={24} color="#0057b7" />
                                 </View>
@@ -187,6 +318,331 @@ export const ContributeScreen = () => {
                 </View>
             </ScrollView>
 
+            {/* Modal Ajouter un lieu */}
+            <Modal
+                visible={isAddPlaceVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setIsAddPlaceVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={[styles.modalContent, themeStyles.card, { height: '90%' }]}>
+                        <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, themeStyles.text]}>Ajouter un lieu</Text>
+                            <TouchableOpacity onPress={() => setIsAddPlaceVisible(false)}>
+                                <X size={24} color={themeStyles.subText.color} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+                            {/* Nom du lieu */}
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Nom du lieu</Text>
+                                <TextInput
+                                    style={[styles.popupInput, { minHeight: 45, color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
+                                    placeholder="Ex: Restaurant Le Gourmet"
+                                    placeholderTextColor={themeStyles.subText.color}
+                                    value={placeData.name}
+                                    onChangeText={(text) => setPlaceData({ ...placeData, name: text })}
+                                />
+                            </View>
+
+                            {/* Catégorie (Menu déroulant simulé) */}
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Catégorie</Text>
+                                <TouchableOpacity
+                                    style={[styles.popupInput, { minHeight: 45, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderColor: themeStyles.divider.backgroundColor }]}
+                                    onPress={() => setIsCategoryPickerVisible(true)}
+                                >
+                                    <Text style={{ color: placeData.category === 'Sélectionner une catégorie' ? (isDark ? '#9ca3af' : '#5f6368') : (isDark ? '#f3f4f6' : '#202124') }}>
+                                        {placeData.category}
+                                    </Text>
+                                    <ChevronDown size={20} color={isDark ? '#9ca3af' : '#5f6368'} />
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Votre adresse */}
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Votre adresse</Text>
+                                <TextInput
+                                    style={[styles.popupInput, { minHeight: 45, color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
+                                    placeholder="Ex: 123 Rue de la Paix, Paris"
+                                    placeholderTextColor={themeStyles.subText.color}
+                                    value={placeData.userAddress}
+                                    onChangeText={(text) => setPlaceData({ ...placeData, userAddress: text })}
+                                />
+                            </View>
+
+                            {/* Carte */}
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Localisation sur la carte</Text>
+                                <View style={[styles.mapPreviewContainer, { borderColor: themeStyles.divider.backgroundColor, height: 200, borderRadius: 12, overflow: 'hidden', marginVertical: 10 }]}>
+                                    <MapView
+                                        provider={PROVIDER_GOOGLE}
+                                        style={StyleSheet.absoluteFillObject}
+                                        initialRegion={{
+                                            latitude: 5.452391,
+                                            longitude: 10.0683,
+                                            latitudeDelta: 0.01,
+                                            longitudeDelta: 0.01,
+                                        }}
+                                        customMapStyle={isDark ? [
+                                            { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
+                                            { "elementType": "labels.text.fill", "stylers": [{ "color": "#746855" }] },
+                                            { "elementType": "labels.text.stroke", "stylers": [{ "color": "#242f3e" }] },
+                                            { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#17263c" }] }
+                                        ] : []}
+                                    />
+                                    <View style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -16, marginTop: -32 }}>
+                                        <MapPin size={32} color="#ea4335" />
+                                    </View>
+                                </View>
+                            </View>
+
+                            {/* Image du lieu */}
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Image du lieu</Text>
+                                <TouchableOpacity
+                                    style={[styles.imageUploadBtn, { backgroundColor: isDark ? '#374151' : '#f0f4f8', padding: 20, borderRadius: 12, alignItems: 'center', borderStyle: 'dashed', borderWidth: 1, borderColor: themeStyles.divider.backgroundColor }]}
+                                    onPress={() => setIsGalleryVisible(true)}
+                                >
+                                    <ImageIcon size={32} color={isDark ? '#60a5fa' : '#0057b7'} />
+                                    <Text style={[styles.imageUploadText, themeStyles.subText, { marginTop: 8 }]}>Ajouter une photo</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Contact */}
+                            <View style={styles.inputGroup}>
+                                <View style={{ flexDirection: 'row', gap: 10 }}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={[styles.label, themeStyles.text]}>Téléphone</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, height: 45, borderColor: themeStyles.divider.backgroundColor }}>
+                                            <Phone size={18} color={isDark ? '#9ca3af' : '#5f6368'} />
+                                            <TextInput
+                                                style={{ flex: 1, marginLeft: 8, color: themeStyles.text.color }}
+                                                placeholder="+33..."
+                                                placeholderTextColor={themeStyles.subText.color}
+                                                keyboardType="phone-pad"
+                                                value={placeData.phone}
+                                                onChangeText={(text) => setPlaceData({ ...placeData, phone: text })}
+                                            />
+                                        </View>
+                                    </View>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={[styles.label, themeStyles.text]}>Site Web</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, height: 45, borderColor: themeStyles.divider.backgroundColor }}>
+                                            <Globe size={18} color={isDark ? '#9ca3af' : '#5f6368'} />
+                                            <TextInput
+                                                style={{ flex: 1, marginLeft: 8, color: themeStyles.text.color }}
+                                                placeholder="www..."
+                                                placeholderTextColor={themeStyles.subText.color}
+                                                value={placeData.website}
+                                                onChangeText={(text) => setPlaceData({ ...placeData, website: text })}
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.publishButton, {
+                                    backgroundColor: isFormValid ? themeStyles.progressBarFill : themeStyles.progressBarBg,
+                                    opacity: isFormValid ? 1 : 0.6
+                                }]}
+                                onPress={handleSubmitPlace}
+                                disabled={!isFormValid || isPublishing}
+                            >
+                                {isPublishing ? <ActivityIndicator color="#fff" /> : <Text style={[styles.publishButtonText, { color: isFormValid ? '#fff' : themeStyles.subText.color }]}>Ajouter le lieu</Text>}
+                            </TouchableOpacity>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Picker de Catégories */}
+            <Modal
+                visible={isCategoryPickerVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsCategoryPickerVisible(false)}
+            >
+                <View style={[styles.popupOverlay, { backgroundColor: 'rgba(0,0,0,0.7)' }]}>
+                    <View style={[styles.popupContent, themeStyles.card, { maxHeight: '70%', width: '90%', alignItems: 'stretch' }]}>
+                        <View style={[styles.modalHeader, { marginBottom: 15 }]}>
+                            <Text style={[styles.popupTitle, themeStyles.text]}>Choisir une catégorie</Text>
+                            <TouchableOpacity onPress={() => setIsCategoryPickerVisible(false)}>
+                                <X size={20} color={themeStyles.subText.color} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView>
+                            {categories.map((cat) => (
+                                <TouchableOpacity
+                                    key={cat.name}
+                                    style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 10, borderBottomWidth: 1, borderBottomColor: themeStyles.divider.backgroundColor }}
+                                    onPress={() => handleSelectCategory(cat.name)}
+                                >
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                                        <cat.icon size={20} color={themeStyles.progressBarFill} />
+                                        <Text style={{ fontSize: 16, color: themeStyles.text.color }}>{cat.name}</Text>
+                                    </View>
+                                    {placeData.category === cat.name && <Check size={18} color={themeStyles.progressBarFill} />}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Modal Ajouter un avis */}
+            <Modal
+                visible={isAddReviewVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setIsAddReviewVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={[styles.modalContent, themeStyles.card, { height: '85%' }]}>
+                        <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, themeStyles.text]}>Ajouter un avis</Text>
+                            <TouchableOpacity onPress={() => setIsAddReviewVisible(false)}>
+                                <X size={24} color={themeStyles.subText.color} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            {/* Nom du lieu */}
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Nom du lieu</Text>
+                                <TextInput
+                                    style={[styles.popupInput, { minHeight: 45, color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
+                                    placeholder="Ex: Musée National"
+                                    placeholderTextColor={themeStyles.subText.color}
+                                    value={reviewData.placeName}
+                                    onChangeText={(text) => setReviewData({ ...reviewData, placeName: text })}
+                                />
+                            </View>
+
+                            {/* Carte */}
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Localisation du lieu</Text>
+                                <View style={[styles.mapPreviewContainer, { borderColor: themeStyles.divider.backgroundColor, height: 180, borderRadius: 12, overflow: 'hidden', marginVertical: 10 }]}>
+                                    <MapView
+                                        provider={PROVIDER_GOOGLE}
+                                        style={StyleSheet.absoluteFillObject}
+                                        initialRegion={{
+                                            latitude: 5.452391,
+                                            longitude: 10.0683,
+                                            latitudeDelta: 0.01,
+                                            longitudeDelta: 0.01,
+                                        }}
+                                        customMapStyle={isDark ? [
+                                            { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
+                                            { "elementType": "labels.text.fill", "stylers": [{ "color": "#746855" }] },
+                                            { "elementType": "labels.text.stroke", "stylers": [{ "color": "#242f3e" }] },
+                                            { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#17263c" }] }
+                                        ] : []}
+                                    />
+                                    <View style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -16, marginTop: -32 }}>
+                                        <MapPin size={32} color="#ea4335" />
+                                    </View>
+                                </View>
+                            </View>
+
+                            {/* Avis */}
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Votre avis</Text>
+                                <TextInput
+                                    style={[styles.popupInput, { minHeight: 120, textAlignVertical: 'top', color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
+                                    placeholder="Partagez votre expérience ici..."
+                                    placeholderTextColor={themeStyles.subText.color}
+                                    multiline
+                                    value={reviewData.review}
+                                    onChangeText={(text) => setReviewData({ ...reviewData, review: text })}
+                                />
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.publishButton, {
+                                    backgroundColor: isReviewValid ? themeStyles.progressBarFill : themeStyles.progressBarBg,
+                                    opacity: isReviewValid ? 1 : 0.6,
+                                    marginTop: 20
+                                }]}
+                                onPress={handleSubmitReview}
+                                disabled={!isReviewValid || isPublishing}
+                            >
+                                {isPublishing ? <ActivityIndicator color="#fff" /> : (
+                                    <>
+                                        <Send size={20} color={isReviewValid ? "#fff" : themeStyles.subText.color} />
+                                        <Text style={[styles.publishButtonText, { color: isReviewValid ? '#fff' : themeStyles.subText.color }]}>Envoyer l'avis</Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Modal Ajouter une photo (Appareil Photo) */}
+            <Modal
+                visible={isAddPhotoVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setIsAddPhotoVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={[styles.modalContent, themeStyles.card, { height: '90%' }]}>
+                        <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, themeStyles.text]}>{isCameraActive ? "Prendre une photo" : "Détails de la photo"}</Text>
+                            <TouchableOpacity onPress={() => setIsAddPhotoVisible(false)}>
+                                <X size={24} color={themeStyles.subText.color} />
+                            </TouchableOpacity>
+                        </View>
+
+                        {isCameraActive ? (
+                            <View style={{ flex: 1, backgroundColor: '#000', borderRadius: 12, justifyContent: 'flex-end', paddingBottom: 40, alignItems: 'center' }}>
+                                <Text style={{ color: '#fff', position: 'absolute', top: 20, textAlign: 'center' }}>Viseur de l'appareil photo</Text>
+                                <TouchableOpacity
+                                    style={{ width: 70, height: 70, borderRadius: 35, backgroundColor: '#fff', borderWidth: 5, borderColor: '#ccc' }}
+                                    onPress={handleCapturePhoto}
+                                />
+                            </View>
+                        ) : (
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                {capturedPhoto && (
+                                    <View style={{ width: '100%', height: 300, borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
+                                        <Image source={{ uri: capturedPhoto }} style={{ width: '100%', height: '100%' }} />
+                                        <TouchableOpacity
+                                            style={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 20 }}
+                                            onPress={() => setIsCameraActive(true)}
+                                        >
+                                            <Trash2 size={20} color="#fff" />
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+
+                                <View style={styles.inputGroup}>
+                                    <Text style={[styles.label, themeStyles.text]}>Commentaire</Text>
+                                    <TextInput
+                                        style={[styles.popupInput, { minHeight: 80, textAlignVertical: 'top', color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
+                                        placeholder="Décrivez ce qui se passe sur cette photo..."
+                                        placeholderTextColor={themeStyles.subText.color}
+                                        multiline
+                                        value={photoComment}
+                                        onChangeText={setPhotoComment}
+                                    />
+                                </View>
+
+                                <TouchableOpacity
+                                    style={[styles.publishButton, { backgroundColor: themeStyles.progressBarFill, marginTop: 20 }]}
+                                    onPress={handleSubmitPhoto}
+                                >
+                                    {isPublishing ? <ActivityIndicator color="#fff" /> : <Text style={styles.publishButtonText}>Poster la photo</Text>}
+                                </TouchableOpacity>
+                            </ScrollView>
+                        )}
+                    </View>
+                </View>
+            </Modal>
 
             {/* Simulated Gallery Modal */}
             <Modal
@@ -565,6 +1021,9 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         borderRadius: 30,
         alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 10,
     },
     publishButtonDisabled: {
         opacity: 0.5,
@@ -618,5 +1077,44 @@ const styles = StyleSheet.create({
     },
     popupButtonText: {
         fontWeight: 'bold',
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 8,
+        marginTop: 15,
+    },
+    mapPreviewContainer: {
+        width: '100%',
+        height: 200,
+        borderRadius: 12,
+        overflow: 'hidden',
+        borderWidth: 1,
+    },
+    mapPreview: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    mapMarkerFixed: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginLeft: -16,
+        marginTop: -32,
+    },
+    imageUploadBtn: {
+        width: '100%',
+        height: 100,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageUploadText: {
+        fontSize: 14,
+        marginTop: 8,
+    },
+    inputGroup: {
+        width: '100%',
     }
 });
