@@ -1,6 +1,6 @@
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, Phone, User as UserIcon } from 'lucide-react-native';
 import React, { useContext, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContext } from './NavigationContext';
 import { ThemeContext } from './ThemeContext';
@@ -204,6 +204,33 @@ export default function AuthScreen() {
                             </Text>
                         </TouchableOpacity>
 
+                        {/* Social Login Buttons */}
+                        {isLogin && (
+                            <>
+                                <View style={styles.dividerContainer}>
+                                    <View style={[styles.divider, { backgroundColor: themeStyles.subText.color }]} />
+                                    <Text style={[styles.dividerText, themeStyles.subText]}>ou</Text>
+                                    <View style={[styles.divider, { backgroundColor: themeStyles.subText.color }]} />
+                                </View>
+                                <View style={styles.socialButtonsContainer}>
+                                    <TouchableOpacity style={[styles.socialButton, { borderColor: themeStyles.input.borderColor }]}>
+                                        <Image
+                                            source={require('../assets/images/socials/google.png')}
+                                            style={styles.socialIcon}
+                                        />
+                                        <Text style={[styles.socialButtonText, themeStyles.text]}>Google</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.socialButton, { borderColor: themeStyles.input.borderColor }]}>
+                                        <Image
+                                            source={require('../assets/images/socials/facebook.png')}
+                                            style={styles.socialIcon}
+                                        />
+                                        <Text style={[styles.socialButtonText, themeStyles.text]}>Facebook</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        )}
+
                         {/* Toggle Login/Signup */}
                         <View style={styles.toggleContainer}>
                             <Text style={[styles.toggleText, themeStyles.subText]}>
@@ -337,6 +364,42 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     toggleLink: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 20,
+        gap: 10,
+    },
+    divider: {
+        flex: 1,
+        height: 1,
+    },
+    dividerText: {
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    socialButtonsContainer: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    socialButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 52,
+        borderRadius: 12,
+        borderWidth: 1,
+        gap: 8,
+    },
+    socialIcon: {
+        width: 20,
+        height: 20,
+    },
+    socialButtonText: {
         fontSize: 14,
         fontWeight: '600',
     },

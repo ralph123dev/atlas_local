@@ -405,10 +405,10 @@ export default function HomeScreen() {
           <View style={[styles.header, themeStyles.header]}>
             <View style={styles.logoHeaderContainer}>
               <Image
-                source={require('@/assets/images/N.png')}
+                source={require('@/assets/images/logo.png')}
                 style={[styles.logo, { borderRadius: 8 }]}
               />
-              <Text style={[styles.logoText, themeStyles.text]}>Nexora</Text>
+              <Text style={[styles.logoText, themeStyles.text]}>Atlas Local</Text>
             </View>
             <View style={{ flex: 1 }} />
             <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/auth')}>
