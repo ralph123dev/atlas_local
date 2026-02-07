@@ -1,8 +1,9 @@
-import { Award, BookOpen, Briefcase, Camera, Check, ChevronDown, Edit3, Globe, Heart, Home, Image as ImageIcon, MapPin, MessageSquare, Navigation, Phone, PlusCircle, Send, Trash2, Utensils, X } from 'lucide-react-native';
+import { Award, BookOpen, Briefcase, Camera, Check, ChevronDown, Edit3, Globe, Heart, Home, Image as ImageIcon, Info, MapPin, MessageSquare, MoreVertical, Navigation, Phone, PlusCircle, Search, Send, Star, Trash2, Utensils, X, XCircle } from 'lucide-react-native';
 import React, { useContext, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { ThemeContext } from '../app/ThemeContext';
+import { styles } from '../constants/styles/Contribute.styles';
 
 export const ContributeScreen = () => {
     const { theme } = useContext(ThemeContext);
@@ -85,6 +86,19 @@ export const ContributeScreen = () => {
         { name: 'Finance', icon: Briefcase },
         { name: 'Autre', icon: PlusCircle }
     ];
+
+    const mockPlaces = [
+        { id: 1, name: 'Boutique Glamour', description: 'Une boutique de mode élégante située au centre-ville.' },
+        { id: 2, name: 'Boulangerie Patachou', description: 'Des croissants chauds et des pains artisanaux tous les matins.' },
+        { id: 3, name: 'Café de la Gare', description: 'L\'endroit idéal pour attendre votre train avec un bon café.' },
+        { id: 4, name: 'Pharmacie Centrale', description: 'Une pharmacie ouverte 24h/24 pour tous vos besoins de santé.' },
+        { id: 5, name: 'Librairie des Arts', description: 'Une vaste collection de livres d\'art et de littérature classique.' }
+    ];
+
+    // State for interactions
+    const [isProposedPlaceOptionsVisible, setIsProposedPlaceOptionsVisible] = useState(false);
+    const [isChangeProposedPlaceVisible, setIsChangeProposedPlaceVisible] = useState(false);
+    const [proposedPlace, setProposedPlace] = useState(mockPlaces[0]);
 
     const isFormValid = placeData.name.trim() !== '' && placeData.category !== 'Sélectionner une catégorie';
     const isReviewValid = reviewData.placeName.trim() !== '' && reviewData.review.trim() !== '';
@@ -203,6 +217,16 @@ export const ContributeScreen = () => {
         setQuestionResponse('');
     };
 
+    const handleIgnoreProposedPlace = () => {
+        setIsProposedPlaceOptionsVisible(false);
+        setIsChangeProposedPlaceVisible(true);
+    };
+
+    const handleSelectNewProposedPlace = (place: typeof mockPlaces[0]) => {
+        setProposedPlace(place);
+        setIsChangeProposedPlaceVisible(false);
+    };
+
     return (
         <View style={[styles.mainContainer, themeStyles.container]}>
             <ScrollView
@@ -311,6 +335,35 @@ export const ContributeScreen = () => {
                         <Text style={styles.contribNowText}>Contribuer maintenant</Text>
                     </TouchableOpacity>
                 </View>
+
+                {/* Proposed Place Rating Section */}
+                {proposedPlace && (
+                    <View style={[styles.section, themeStyles.card, styles.proposedPlaceCard]}>
+                        <View style={styles.proposedPlaceHeader}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={[styles.proposedPlaceTitle, themeStyles.text]}>{proposedPlace.name}</Text>
+                                <Text style={[styles.proposedPlaceDesc, themeStyles.subText]}>{proposedPlace.description}</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => setIsProposedPlaceOptionsVisible(true)}
+                                style={styles.moreOptionsBtnSmall}
+                            >
+                                <MoreVertical size={20} color={themeStyles.subText.color} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.ratingStarsContainer}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <Star key={star} size={32} color="#dadce0" style={{ marginHorizontal: 4 }} />
+                            ))}
+                        </View>
+                        <Text style={[styles.noterLieuText, { color: themeStyles.progressBarFill }]}>Noter ce lieu</Text>
+
+                        <TouchableOpacity style={styles.ignoreLink} onPress={handleIgnoreProposedPlace}>
+                            <Text style={styles.blueLinkText}>Ignorer</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
                 {/* Additional Section */}
                 <View style={[styles.section, themeStyles.card, { alignItems: 'center', padding: 30 }]}>
@@ -743,378 +796,80 @@ export const ContributeScreen = () => {
                     </View>
                 </View>
             </Modal>
+
+            {/* Options Modal for Proposed Place */}
+            <Modal
+                visible={isProposedPlaceOptionsVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsProposedPlaceOptionsVisible(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlayTransparent}
+                    activeOpacity={1}
+                    onPress={() => setIsProposedPlaceOptionsVisible(false)}
+                >
+                    <View style={[styles.menuPopup, themeStyles.card]}>
+                        <TouchableOpacity style={styles.menuItem} onPress={handleIgnoreProposedPlace}>
+                            <Trash2 size={20} color={themeStyles.subText.color} />
+                            <Text style={[styles.menuItemText, themeStyles.text]}>Ignorer ce lieu</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.menuItem} onPress={() => setIsProposedPlaceOptionsVisible(false)}>
+                            <XCircle size={20} color={themeStyles.subText.color} />
+                            <Text style={[styles.menuItemText, themeStyles.text]}>Lieu non visité</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.menuItem} onPress={() => setIsProposedPlaceOptionsVisible(false)}>
+                            <Info size={20} color={themeStyles.subText.color} />
+                            <Text style={[styles.menuItemText, themeStyles.text]}>En savoir plus sur ce lieu</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.menuItem} onPress={() => {
+                            setIsProposedPlaceOptionsVisible(false);
+                            setIsChangeProposedPlaceVisible(true);
+                        }}>
+                            <Search size={20} color={themeStyles.subText.color} />
+                            <Text style={[styles.menuItemText, themeStyles.text]}>Rechercher un autre lieu</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Change Proposed Place Modal */}
+            <Modal
+                visible={isChangeProposedPlaceVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setIsChangeProposedPlaceVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={[styles.modalContent, themeStyles.card]}>
+                        <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, themeStyles.text]}>Choisir un lieu</Text>
+                            <TouchableOpacity onPress={() => setIsChangeProposedPlaceVisible(false)}>
+                                <X size={24} color={themeStyles.subText.color} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            {mockPlaces.map((place) => (
+                                <TouchableOpacity
+                                    key={place.id}
+                                    style={styles.placeItem}
+                                    onPress={() => handleSelectNewProposedPlace(place)}
+                                >
+                                    <View style={styles.placeIconCircle}>
+                                        <MapPin size={20} color="#0057b7" />
+                                    </View>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={[styles.placeItemName, themeStyles.text]}>{place.name}</Text>
+                                        <Text style={[styles.placeItemDesc, themeStyles.subText]} numberOfLines={1}>{place.description}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
 
-const styles = StyleSheet.create({
-    mainContainer: {
-        flex: 1,
-    },
-    section: {
-        marginHorizontal: 16,
-        marginTop: 16,
-        borderRadius: 16,
-        padding: 16,
-        borderWidth: 1,
-    },
-    profileSection: {
-        marginTop: 8
-    },
-    profileHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    avatar: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        marginRight: 16,
-    },
-    profileInfo: {
-        flex: 1,
-    },
-    userName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    userLevel: {
-        fontSize: 13,
-        fontWeight: '600',
-        marginTop: 2,
-    },
-    progressContainer: {
-        marginTop: 4,
-    },
-    progressTextRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 6,
-    },
-    progressLabel: {
-        fontSize: 12,
-    },
-    pointsText: {
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    progressBarContainer: {
-        height: 8,
-        borderRadius: 4,
-        overflow: 'hidden',
-    },
-    progressBarFill: {
-        height: '100%',
-        borderRadius: 4,
-    },
-    progressSubtitle: {
-        fontSize: 11,
-        marginTop: 8,
-    },
-    actionsContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 8,
-        marginTop: 24,
-        marginBottom: 8,
-    },
-    actionsScrollContent: {
-        paddingHorizontal: 8,
-    },
-    actionButton: {
-        alignItems: 'center',
-        width: 90,
-        marginHorizontal: 6,
-    },
-    actionIconContainer: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 8,
-        borderWidth: 1,
-    },
-    shadow: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    actionLabel: {
-        fontSize: 11,
-        textAlign: 'center',
-        fontWeight: '500',
-    },
-    badgeHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    badgeTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginLeft: 12,
-        flex: 1,
-    },
-    divider: {
-        height: 1,
-        width: '100%',
-        marginBottom: 16,
-    },
-    taskItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-    },
-    taskLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    taskIconCircle: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 16,
-    },
-    taskContent: {
-        flex: 1,
-        marginRight: 16,
-    },
-    taskName: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginBottom: 6,
-    },
-    taskProgressBg: {
-        height: 4,
-        width: '100%',
-        borderRadius: 2,
-    },
-    taskProgressFill: {
-        height: '100%',
-        borderRadius: 2,
-    },
-    taskStatus: {
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    moreActionsBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingTop: 16,
-        marginTop: 8,
-        borderTopWidth: 1,
-    },
-    moreActionsText: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        marginLeft: 8,
-    },
-    emptyFeedText: {
-        fontSize: 13,
-        textAlign: 'center',
-        lineHeight: 18,
-    },
-    // Balloon Card Styles
-    balloonCard: {
-        alignItems: 'center',
-        paddingVertical: 24,
-    },
-    balloonIconBg: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#fff5f5',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 16,
-        borderWidth: 1,
-        borderColor: '#fee2e2',
-    },
-    balloonEmoji: {
-        fontSize: 32,
-    },
-    balloonTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    balloonDescription: {
-        fontSize: 14,
-        textAlign: 'center',
-        paddingHorizontal: 20,
-        lineHeight: 20,
-        marginBottom: 16,
-    },
-    contribNowBtn: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-    },
-    contribNowText: {
-        color: '#34a853',
-        fontWeight: 'bold',
-        fontSize: 15,
-    },
-    // Modal Styles
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.6)',
-    },
-    modalContent: {
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        padding: 24,
-        minHeight: 450,
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    galleryGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-    },
-    galleryItem: {
-        width: '31%',
-        aspectRatio: 1,
-        marginBottom: 12,
-        borderRadius: 12,
-        overflow: 'hidden',
-    },
-    galleryImage: {
-        width: '100%',
-        height: '100%',
-    },
-    galleryItemSelected: {
-        borderWidth: 4,
-        borderColor: '#0057b7',
-    },
-    checkOverlay: {
-        position: 'absolute',
-        top: 6,
-        right: 6,
-        backgroundColor: '#0057b7',
-        borderRadius: 12,
-        width: 24,
-        height: 24,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    publishButton: {
-        marginTop: 24,
-        paddingVertical: 16,
-        borderRadius: 30,
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 10,
-    },
-    publishButtonDisabled: {
-        opacity: 0.5,
-    },
-    publishButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    popupOverlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.6)',
-    },
-    popupContent: {
-        width: '85%',
-        borderRadius: 24,
-        padding: 24,
-        alignItems: 'center',
-        borderWidth: 1,
-    },
-    popupTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    popupSubtitle: {
-        fontSize: 14,
-        textAlign: 'center',
-        marginBottom: 20,
-    },
-    popupInput: {
-        width: '100%',
-        padding: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        minHeight: 80,
-        textAlignVertical: 'top',
-        marginBottom: 24,
-    },
-    popupActions: {
-        flexDirection: 'row',
-        width: '100%',
-    },
-    popupButton: {
-        flex: 1,
-        paddingVertical: 12,
-        borderRadius: 24,
-        alignItems: 'center',
-    },
-    popupButtonText: {
-        fontWeight: 'bold',
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginBottom: 8,
-        marginTop: 15,
-    },
-    mapPreviewContainer: {
-        width: '100%',
-        height: 200,
-        borderRadius: 12,
-        overflow: 'hidden',
-        borderWidth: 1,
-    },
-    mapPreview: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    mapMarkerFixed: {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        marginLeft: -16,
-        marginTop: -32,
-    },
-    imageUploadBtn: {
-        width: '100%',
-        height: 100,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderStyle: 'dashed',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    imageUploadText: {
-        fontSize: 14,
-        marginTop: 8,
-    },
-    inputGroup: {
-        width: '100%',
-    }
-});
+
