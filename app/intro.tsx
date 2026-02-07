@@ -38,7 +38,7 @@ export default function IntroScreen() {
 
         <Text style={[styles.title, themeStyles.text]}>Simple et pratique</Text>
         <Text style={[styles.subtitle, themeStyles.subText]}>
-          Trouvez ce dont vous avez besoin en un coup d'œil sur la carte
+          Trouvez ce dont vous avez besoin en un coup d&apos;œil sur la carte
         </Text>
 
         <View style={styles.featuresContainer}>

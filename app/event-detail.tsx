@@ -50,7 +50,7 @@ export default function EventDetailScreen() {
         return (
             <SafeAreaView style={[styles.container, themeStyles.container]}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={themeStyles.text}>Chargement de l'événement...</Text>
+                    <Text style={themeStyles.text}>Chargement de l&apos;événement...</Text>
                     <TouchableOpacity onPress={() => router.push('/events')} style={{ marginTop: 20 }}>
                         <Text style={{ color: '#0057b7' }}>Retour aux événements</Text>
                     </TouchableOpacity>

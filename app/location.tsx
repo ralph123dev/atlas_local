@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { MapPin, Navigation } from 'lucide-react-native';
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Alert, Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { OnboardingDots } from '../components/OnboardingDots';
 import { NavigationContext } from './NavigationContext';
@@ -44,7 +44,7 @@ export default function LocationScreen() {
       } else if (status === 'denied') {
         Alert.alert(
           'Permission refusée',
-          'Vous avez refusé l\'accès à la localisation. Vous pouvez l\'activer plus tard dans les paramètres.',
+          'Vous avez refusé l&apos;accès à la localisation. Vous pouvez l&apos;activer plus tard dans les paramètres.',
           [
             { text: 'OK', onPress: () => setIsRequesting(false) },
             {
@@ -60,7 +60,7 @@ export default function LocationScreen() {
         // Status peut être 'undetermined' ou autre
         Alert.alert(
           'Permission requise',
-          'L\'accès à la localisation est nécessaire pour utiliser cette fonctionnalité.',
+          'L&apos;accès à la localisation est nécessaire pour utiliser cette fonctionnalité.',
           [{ text: 'OK', onPress: () => setIsRequesting(false) }]
         );
       }
@@ -90,11 +90,11 @@ export default function LocationScreen() {
 
       let message = 'Impossible d\'obtenir votre position.';
 
-      if (error.code === 'E_LOCATION_SERVICES_DISABLED') {
+      if ((error as any).code === 'E_LOCATION_SERVICES_DISABLED') {
         message = 'Les services de localisation sont désactivés. Activez le GPS dans vos paramètres.';
-      } else if (error.code === 'E_LOCATION_TIMEOUT') {
+      } else if ((error as any).code === 'E_LOCATION_TIMEOUT') {
         message = 'La demande a expiré. Vérifiez votre connexion GPS et réessayez.';
-      } else if (error.code === 'E_LOCATION_UNAVAILABLE') {
+      } else if ((error as any).code === 'E_LOCATION_UNAVAILABLE') {
         message = 'Position non disponible. Assurez-vous que le GPS est activé.';
       }
 
@@ -118,7 +118,7 @@ export default function LocationScreen() {
 
         <Text style={styles.title}>Localisation</Text>
         <Text style={styles.subtitle}>
-          Autorisez l'accès à votre position pour découvrir les services près de chez vous
+          Autorisez l&apos;accès à votre position pour découvrir les services près de chez vous
         </Text>
       </View>
 

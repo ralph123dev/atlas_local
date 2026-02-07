@@ -36,7 +36,7 @@ export default function DashboardScreen() {
                 <View style={styles.emptyState}>
                     <Text style={[styles.emptyTitle, themeStyles.text]}>Aucun événement créé</Text>
                     <Text style={[styles.emptySubtitle, themeStyles.subText]}>
-                        Vous n'avez pas encore créé d'événements. Commencez à partager avec la communauté dès aujourd'hui !
+                        Vous n&apos;avez pas encore créé d&apos;événements. Commencez à partager avec la communauté dès aujourd&apos;hui !
                     </Text>
 
                     <TouchableOpacity

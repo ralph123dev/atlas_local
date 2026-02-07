@@ -249,7 +249,7 @@ export default function EventsScreen() {
 
                         <ScrollView showsVerticalScrollIndicator={false}>
                             <View style={styles.inputGroup}>
-                                <Text style={[styles.label, themeStyles.text]}>Nom de l'événement</Text>
+                                <Text style={[styles.label, themeStyles.text]}>Nom de l&apos;événement</Text>
                                 <TextInput
                                     style={[styles.input, themeStyles.inputBg]}
                                     placeholder="Ex: Soirée Networking"
@@ -294,7 +294,7 @@ export default function EventsScreen() {
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={[styles.label, themeStyles.text]}>Type d'événement</Text>
+                                <Text style={[styles.label, themeStyles.text]}>Type d&apos;événement</Text>
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                     {types.slice(1).map(type => (
                                         <TouchableOpacity
@@ -317,7 +317,7 @@ export default function EventsScreen() {
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={[styles.label, themeStyles.text]}>Thumbnail (URL de l'image)</Text>
+                                <Text style={[styles.label, themeStyles.text]}>Thumbnail (URL de l&apos;image)</Text>
                                 <TextInput
                                     style={[styles.input, themeStyles.inputBg]}
                                     placeholder="https://..."
