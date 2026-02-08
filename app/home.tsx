@@ -141,7 +141,7 @@ export default function HomeScreen() {
 
   const fetchNearbyPlaces = async (lat: number, lng: number) => {
     try {
-      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1000&type=restaurant|cafe|shopping_mall|store&key=${GOOGLE_API_KEY}`;
+      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1000&type=restaurant|cafe|shopping_mall|store&key=${GOOGLE_API_KEY}`; //Carte Google maps
       const response = await fetch(url);
       const data = await response.json();
       if (data.results) {
@@ -309,6 +309,8 @@ export default function HomeScreen() {
     progressBarFill: isDark ? '#60a5fa' : '#0057b7',
     categoryBtn: { backgroundColor: isDark ? '#374151' : '#f3f4f6', borderColor: isDark ? '#4b5563' : '#e5e7eb' },
     categoryBtnText: { color: isDark ? '#9ca3af' : '#4b5563' },
+    categoryMenuBorder: { borderBottomColor: isDark ? '#374151' : '#e5e7eb' },
+    categoryTabInactiveText: { color: isDark ? '#6b7280' : '#9ca3af' },
   };
 
   const renderContent = () => {
@@ -543,39 +545,30 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* Category Selector Buttons */}
-            <View style={{ paddingBottom: 10 }}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.categorySelector}
-                contentContainerStyle={{ paddingHorizontal: 5 }}
-              >
-                {[
-                  { id: 'all', label: 'Tout', icon: MapLucideIcon },
-                  { id: 'hotels', label: 'Hôtels', icon: Hotel },
-                  { id: 'restaurants', label: 'Restaurants', icon: Utensils },
-                  { id: 'supermarkets', label: 'Magasins', icon: ShoppingBag },
-                  { id: 'banks', label: 'Banques', icon: Banknote },
-                ].map((cat) => (
-                  <TouchableOpacity
-                    key={cat.id}
-                    style={[
-                      styles.categoryBtn,
-                      themeStyles.categoryBtn,
-                      selectedCategory === cat.id && styles.categoryBtnActive
-                    ]}
-                    onPress={() => setSelectedCategory(cat.id as any)}
-                  >
-                    <cat.icon size={16} color={selectedCategory === cat.id ? '#fff' : (isDark ? '#9ca3af' : '#4b5563')} />
-                    <Text style={[
-                      styles.categoryBtnText,
-                      themeStyles.categoryBtnText,
-                      selectedCategory === cat.id && styles.categoryBtnTextActive
-                    ]}>{cat.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+            {/* Category Menu Tabs */}
+            <View style={[styles.categoryMenuContainer, themeStyles.categoryMenuBorder]}>
+              {[
+                { id: 'all', label: 'Tout' },
+                { id: 'hotels', label: 'Hôtels' },
+                { id: 'restaurants', label: 'Restaurants' },
+                { id: 'supermarkets', label: 'Magasins' },
+                { id: 'banks', label: 'Banques' },
+              ].map((cat) => (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[
+                    styles.categoryTab,
+                    selectedCategory === cat.id && styles.categoryTabActive
+                  ]}
+                  onPress={() => setSelectedCategory(cat.id as any)}
+                >
+                  <Text style={[
+                    styles.categoryTabText,
+                    selectedCategory !== cat.id && themeStyles.categoryTabInactiveText,
+                    selectedCategory === cat.id && styles.categoryTabTextActive
+                  ]}>{cat.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
 
             {/* Scrollable Content */}

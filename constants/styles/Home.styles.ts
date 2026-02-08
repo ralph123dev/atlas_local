@@ -365,31 +365,53 @@ export const styles = StyleSheet.create({
         flex: 1,
         paddingBottom: 20,
     },
-    categorySelector: {
-        flexDirection: 'row',
+    categorySelectorScroll: {
         marginBottom: 15,
-        paddingBottom: 5,
+    },
+    categorySelectorContent: {
+        paddingHorizontal: 15,
+    },
+    categoryMenuContainer: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e5e7eb',
+        marginBottom: 15,
+    },
+    categoryTab: {
+        flex: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 8,
+        alignItems: 'center',
+        borderBottomWidth: 3,
+        borderBottomColor: 'transparent',
+    },
+    categoryTabActive: {
+        borderBottomColor: '#0057b7',
+    },
+    categoryTabText: {
+        fontSize: 13,
+        fontWeight: '500',
+    },
+    categoryTabTextActive: {
+        color: '#0057b7',
+        fontWeight: '600',
     },
     categoryBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
         borderRadius: 20,
-        backgroundColor: '#f3f4f6',
-        marginRight: 10,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
+        marginRight: 8,
+        backgroundColor: '#fff',
     },
     categoryBtnActive: {
         backgroundColor: '#0057b7',
-        borderColor: '#0057b7',
     },
     categoryBtnText: {
         fontSize: 13,
-        fontWeight: '600',
-        color: '#4b5563',
-        marginLeft: 6,
+        fontWeight: '500',
+        marginLeft: 4,
     },
     categoryBtnTextActive: {
         color: '#fff',
