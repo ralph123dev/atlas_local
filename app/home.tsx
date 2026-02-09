@@ -576,9 +576,6 @@ export default function HomeScreen() {
               style={{ flex: 1 }}
               contentContainerStyle={{ paddingBottom: 140 }}
               showsVerticalScrollIndicator={false}
-            // This is crucial: the pan gesture on the parent might block scroll if not coordinated.
-            // In this case, we rely on the parent Pan gesture. 
-            // To allow scrolling, we ensure the translateY is at max height.
             >
               <View style={styles.sheetContent}>
                 {/* Hotels Section */}
