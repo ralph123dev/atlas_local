@@ -1,5 +1,5 @@
 import * as ExpoLocation from 'expo-location';
-import { Banknote, Cloud, Coffee, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, ShoppingBag, Trees, User, Utensils, X } from 'lucide-react-native';
+import { ChevronRight, Cloud, Coffee, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, Trees, User, Utensils, X } from 'lucide-react-native';
 
 
 import React, { useContext, useEffect, useState } from 'react';
@@ -15,7 +15,7 @@ import { styles } from '../constants/styles/Home.styles';
 import { NavigationContext } from './NavigationContext';
 import { ThemeContext } from './ThemeContext';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const SHEET_MIN_HEIGHT = 120;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.8;
 
@@ -80,9 +80,9 @@ export default function HomeScreen() {
     })
     .onEnd((event) => {
       if (event.velocityY < -500 || translateY.value < SCREEN_HEIGHT - SHEET_MAX_HEIGHT / 2) {
-        translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 15 });
+        translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 25, stiffness: 150 });
       } else {
-        translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MIN_HEIGHT, { damping: 15 });
+        translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MIN_HEIGHT, { damping: 25, stiffness: 150 });
       }
     });
 
@@ -116,6 +116,7 @@ export default function HomeScreen() {
   const [streetViewCoords, setStreetViewCoords] = useState<{ latitude: number, longitude: number } | null>(null);
   const [isStreetViewVisible, setIsStreetViewVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'hotels' | 'restaurants' | 'supermarkets' | 'banks'>('all');
+  const [selectedPlaces, setSelectedPlaces] = useState<any[]>([]);
   const GOOGLE_API_KEY = "AIzaSyAOAGJB7TlVNo01s0-zVx_ObVRCkivqaNs";
 
   useEffect(() => {
@@ -163,6 +164,20 @@ export default function HomeScreen() {
       fetchNearbyPlaces(location.coords.latitude, location.coords.longitude);
     }
   };
+
+  const openSheetWithCategory = (category: string) => {
+    let placesToShow: any[] = [];
+    if (category === 'Restaurants') placesToShow = categories_data.restaurants;
+    else if (category === 'Hôtels') placesToShow = categories_data.hotels;
+    else if (category === 'Cafés') placesToShow = categories_data.restaurants; // Fallback
+    else if (category === 'Parcs') placesToShow = categories_data.supermarkets; // Fallback
+    else placesToShow = [...categories_data.hotels, ...categories_data.restaurants];
+
+    setSelectedPlaces(placesToShow);
+    translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 25, stiffness: 150 });
+  };
+
+
 
   const handleSearch = async () => {
     if (!searchText.trim()) return;
@@ -411,7 +426,14 @@ export default function HomeScreen() {
                   { label: 'Cafés', icon: Coffee },
                   { label: 'Parcs', icon: Trees }
                 ].map((item) => (
-                  <TouchableOpacity key={item.label} style={[styles.quickActionBtn, themeStyles.searchContainer, styles.shadow]} onPress={() => setSearchText(item.label)}>
+                  <TouchableOpacity
+                    key={item.label}
+                    style={[styles.quickActionBtn, themeStyles.searchContainer, styles.shadow]}
+                    onPress={() => {
+                      setSearchText(item.label);
+                      openSheetWithCategory(item.label);
+                    }}
+                  >
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       {item.icon && <item.icon size={16} color={themeStyles.text.color} style={{ marginRight: 6 }} />}
                       <Text style={[styles.quickActionText, themeStyles.text]}>{item.label}</Text>
@@ -524,159 +546,118 @@ export default function HomeScreen() {
 
       {/* Persistent Bottom Sheet Explorer Overlay */}
       {activeTab === 'explorer' && (
-        <GestureDetector gesture={panGesture}>
-          <Animated.View style={[
-            styles.bottomSheet,
-            themeStyles.card,
-            animatedSheetStyle,
-            { zIndex: 1000, bottom: 0 }
-          ]}>
-            {/* Grabber Area - Pull up/down here primarily */}
-            <View style={styles.sheetHandleContainer}>
-              <View style={styles.sheetHandle} />
-            </View>
+        <Animated.View style={[
+          styles.bottomSheet,
+          themeStyles.card,
+          animatedSheetStyle,
+          { zIndex: 1500, bottom: 0 }
+        ]}>
+          {/* Grabber Area - Pull up/down here primarily */}
+          <GestureDetector gesture={panGesture}>
+            <View style={{ backgroundColor: 'transparent' }}>
+              <View style={styles.sheetHandleContainer}>
+                <View style={styles.sheetHandle} />
+              </View>
 
-            {/* Weather Header */}
-            <View style={styles.sheetHeader}>
-              <Text style={[styles.sheetCityName, themeStyles.text]}>Yaoundé, Cameroun</Text>
-              <View style={styles.weatherInfo}>
-                <Cloud size={24} color={isDark ? '#60a5fa' : '#0057b7'} />
-                <Text style={[styles.temperatureText, themeStyles.text]}>23°C</Text>
+              {/* Weather Header */}
+              <View style={[styles.sheetHeader, { borderBottomWidth: 0, marginBottom: 10 }]}>
+                <View>
+                  <Text style={[styles.sheetCityName, themeStyles.text]}>Yaoundé, Cameroun</Text>
+                </View>
+                <View style={styles.weatherInfo}>
+                  <Cloud size={24} color={isDark ? '#60a5fa' : '#0057b7'} />
+                  <Text style={[styles.temperatureText, themeStyles.text]}>23°C</Text>
+                </View>
               </View>
             </View>
+          </GestureDetector>
 
-            {/* Category Menu Tabs */}
-            <View style={[styles.categoryMenuContainer, themeStyles.categoryMenuBorder]}>
-              {[
-                { id: 'all', label: 'Tout' },
-                { id: 'hotels', label: 'Hôtels' },
-                { id: 'restaurants', label: 'Restaurants' },
-                { id: 'supermarkets', label: 'Magasins' },
-                { id: 'banks', label: 'Banques' },
-              ].map((cat) => (
-                <TouchableOpacity
-                  key={cat.id}
-                  style={[
-                    styles.categoryTab,
-                    selectedCategory === cat.id && styles.categoryTabActive
-                  ]}
-                  onPress={() => setSelectedCategory(cat.id as any)}
+          {/* Scrollable Content */}
+          <ScrollView
+            style={styles.sheetContent}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 150 }} // Space for BottomNav
+            nestedScrollEnabled={true}
+          >
+            {selectedPlaces.length > 0 ? (
+              <View style={[styles.carouselContainer, { marginTop: 0 }]}>
+                <ScrollView
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  decelerationRate="fast"
+                  style={{ width: '100%' }}
+                  nestedScrollEnabled={true}
                 >
-                  <Text style={[
-                    styles.categoryTabText,
-                    selectedCategory !== cat.id && themeStyles.categoryTabInactiveText,
-                    selectedCategory === cat.id && styles.categoryTabTextActive
-                  ]}>{cat.label}</Text>
+                  {Array.from({ length: Math.ceil(selectedPlaces.length / 2) }).map((_, pageIdx) => (
+                    <View key={pageIdx} style={[styles.cardsRow, { width: SCREEN_WIDTH - 40 }]}>
+                      {[selectedPlaces[pageIdx * 2], selectedPlaces[pageIdx * 2 + 1]].map((place, idx) => (
+                        place && (
+                          <View key={place.id || idx} style={styles.twinCard}>
+                            <View style={styles.twinBlackFrame}>
+                              <Image
+                                source={{ uri: place.image }}
+                                style={styles.fullImage}
+                                resizeMode="cover"
+                              />
+                            </View>
+                            <View style={styles.twinCardInfo}>
+                              <Text style={[styles.twinCardTitle, themeStyles.text]} numberOfLines={1}>{place.name}</Text>
+                              <Text style={[styles.twinCardSub, themeStyles.subText]}>Hôtel • 4.5 ★</Text>
+                              <Text style={[styles.twinCardDistance, themeStyles.subText]}>{place.distance}m • Yaoundé</Text>
+                            </View>
+                          </View>
+                        )
+                      ))}
+                    </View>
+                  ))}
+                </ScrollView>
+
+                <TouchableOpacity style={styles.seeAllTrendingBtn}>
+                  <Text style={styles.seeAllTrendingText}>See all trending</Text>
+                  <ChevronRight size={16} color="#6b7280" />
                 </TouchableOpacity>
-              ))}
-            </View>
 
-            {/* Scrollable Content */}
-            <ScrollView
-              style={{ flex: 1 }}
-              contentContainerStyle={{ paddingBottom: 140 }}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.sheetContent}>
-                {/* Hotels Section */}
-                {(selectedCategory === 'all' || selectedCategory === 'hotels') && (
-                  <>
-                    <View style={styles.sectionHeader}>
-                      <Hotel size={20} color={themeStyles.iconActive} />
-                      <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Hôtels à proximité</Text>
-                    </View>
-                    {categories_data.hotels.map((hotel) => (
-                      <View key={`hotel-${hotel.id}`} style={styles.listItem}>
-                        <View style={styles.itemImageContainer}>
-                          <Image source={{ uri: hotel.image }} style={styles.itemImage} />
-                          <View style={styles.priceBadge}>
-                            <Text style={styles.priceText}>{hotel.price} FCFA</Text>
-                          </View>
-                        </View>
-                        <View style={styles.itemInfo}>
-                          <Text style={[styles.itemName, themeStyles.text]}>{hotel.name}</Text>
-                          <Text style={[styles.itemDistance, themeStyles.subText]}>{hotel.distance}m de vous</Text>
-                        </View>
-                      </View>
-                    ))}
-                  </>
-                )}
+                {/* Additional Categories Section */}
+                <View style={{ width: '100%', marginTop: 30 }}>
+                  <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0 }]}>Découvrir aussi</Text>
 
-                {/* Restaurants Section */}
-                {(selectedCategory === 'all' || selectedCategory === 'restaurants') && (
-                  <>
-                    <View style={styles.sectionHeader}>
-                      <Utensils size={20} color={themeStyles.iconActive} />
-                      <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Restaurants populaires</Text>
-                    </View>
-                    {categories_data.restaurants.map((res) => (
-                      <View key={`res-${res.id}`} style={styles.listItem}>
-                        <View style={styles.itemImageContainer}>
-                          <Image source={{ uri: res.image }} style={styles.itemImage} />
-                          <View style={styles.priceBadge}>
-                            <Text style={styles.priceText}>{res.price} FCFA</Text>
-                          </View>
+                  {/* Restaurants Section */}
+                  <Text style={[themeStyles.subText, { marginBottom: 15, fontWeight: '600', fontSize: 16 }]}>Restaurants populaires</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 25 }} nestedScrollEnabled={true}>
+                    {categories_data.restaurants.map((item) => (
+                      <TouchableOpacity key={item.id} style={{ marginRight: 20, width: 160 }}>
+                        <View style={styles.twinBlackFrame}>
+                          <Image source={{ uri: item.image }} style={styles.fullImage} />
                         </View>
-                        <View style={styles.itemInfo}>
-                          <Text style={[styles.itemName, themeStyles.text]}>{res.name}</Text>
-                          <Text style={[styles.itemDistance, themeStyles.subText]}>{res.distance}m de vous</Text>
-                        </View>
-                      </View>
+                        <Text style={[themeStyles.text, { fontWeight: 'bold', marginTop: 10, fontSize: 14 }]} numberOfLines={1}>{item.name}</Text>
+                        <Text style={[themeStyles.subText, { fontSize: 12, marginTop: 2 }]}>{item.distance}m • Yaoundé</Text>
+                      </TouchableOpacity>
                     ))}
-                  </>
-                )}
+                  </ScrollView>
 
-                {/* Supermarkets Section */}
-                {(selectedCategory === 'all' || selectedCategory === 'supermarkets') && (
-                  <>
-                    <View style={styles.sectionHeader}>
-                      <ShoppingBag size={20} color={themeStyles.iconActive} />
-                      <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Super Marchés & Boutiques</Text>
-                    </View>
-                    {categories_data.supermarkets.map((m) => (
-                      <View key={`shop-${m.id}`} style={styles.listItem}>
-                        <View style={styles.itemImageContainer}>
-                          <Image source={{ uri: m.image }} style={styles.itemImage} />
-                          <View style={styles.priceBadge}>
-                            <Text style={styles.priceText}>{m.price}</Text>
-                          </View>
+                  {/* Hotels Section */}
+                  <Text style={[themeStyles.subText, { marginBottom: 15, fontWeight: '600', fontSize: 16 }]}>Hôtels à proximité</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled={true}>
+                    {categories_data.hotels.map((item) => (
+                      <TouchableOpacity key={item.id} style={{ marginRight: 20, width: 160 }}>
+                        <View style={styles.twinBlackFrame}>
+                          <Image source={{ uri: item.image }} style={styles.fullImage} />
                         </View>
-                        <View style={styles.itemInfo}>
-                          <Text style={[styles.itemName, themeStyles.text]}>{m.name}</Text>
-                          <Text style={[styles.itemDistance, themeStyles.subText]}>{m.distance}m de vous</Text>
-                        </View>
-                      </View>
+                        <Text style={[themeStyles.text, { fontWeight: 'bold', marginTop: 10, fontSize: 14 }]} numberOfLines={1}>{item.name}</Text>
+                        <Text style={[themeStyles.subText, { fontSize: 12, marginTop: 2 }]}>{item.distance}m • Yaoundé</Text>
+                      </TouchableOpacity>
                     ))}
-                  </>
-                )}
-
-                {/* Banks Section */}
-                {(selectedCategory === 'all' || selectedCategory === 'banks') && (
-                  <>
-                    <View style={styles.sectionHeader}>
-                      <Banknote size={20} color={themeStyles.iconActive} />
-                      <Text style={[styles.sectionTitle, themeStyles.text, { marginTop: 0, marginLeft: 10 }]}>Banques & Distributeurs</Text>
-                    </View>
-                    {categories_data.banks.map((b) => (
-                      <View key={`bank-${b.id}`} style={styles.listItem}>
-                        <View style={styles.itemImageContainer}>
-                          <Image source={{ uri: b.image }} style={styles.itemImage} />
-                          <View style={styles.priceBadge}>
-                            <Text style={styles.priceText}>{b.price}</Text>
-                          </View>
-                        </View>
-                        <View style={styles.itemInfo}>
-                          <Text style={[styles.itemName, themeStyles.text]}>{b.name}</Text>
-                          <Text style={[styles.itemDistance, themeStyles.subText]}>{b.distance}m de vous</Text>
-                        </View>
-                      </View>
-                    ))}
-                  </>
-                )}
+                  </ScrollView>
+                </View>
               </View>
-            </ScrollView>
-          </Animated.View>
-        </GestureDetector>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={[styles.emptyText, themeStyles.text]}>Sélectionnez une catégorie pour voir les lieux</Text>
+              </View>
+            )}
+          </ScrollView>
+        </Animated.View>
       )}
 
       {/* Navigation Bar - Always on front/bottom */}
@@ -685,7 +666,7 @@ export default function HomeScreen() {
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 2000,
+        zIndex: 3000,
         backgroundColor: isDark ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)',
         borderTopWidth: 1,
         borderTopColor: isDark ? '#374151' : '#f3f4f6',

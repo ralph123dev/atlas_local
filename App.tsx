@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView, State } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AskScreen from './app/ask';
 import AuthScreen from './app/auth';
 import DashboardScreen from './app/dashboard';
@@ -128,28 +129,30 @@ export default function App() {
 
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeContext.Provider value={{ theme, setTheme, setThemeWithTransition }}>
-        <NavigationContext.Provider value={navigation}>
-          <View style={{ flex: 1 }}>
-            {/* Couche de base : Ancien thème ou thème actuel si pas d'animation */}
-            <View style={[styles.container, { backgroundColor: getThemeColor(isAnimating ? previousTheme : theme) }]}>
-              {renderContent()}
-            </View>
-
-            {/* Couche d'animation : L'onde du nouveau thème qui s'étend */}
-            {isAnimating && (
-              <View style={[StyleSheet.absoluteFill, { overflow: 'hidden', zIndex: 9999 }]} pointerEvents="none">
-                <Animated.View style={[styles.ripple, animatedStyle]} />
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeContext.Provider value={{ theme, setTheme, setThemeWithTransition }}>
+          <NavigationContext.Provider value={navigation}>
+            <View style={{ flex: 1 }}>
+              {/* Couche de base : Ancien thème ou thème actuel si pas d'animation */}
+              <View style={[styles.container, { backgroundColor: getThemeColor(isAnimating ? previousTheme : theme) }]}>
+                {renderContent()}
               </View>
-            )}
-            {/* 
-                  
-               */}
-          </View>
-        </NavigationContext.Provider>
-      </ThemeContext.Provider>
-    </GestureHandlerRootView>
+
+              {/* Couche d'animation : L'onde du nouveau thème qui s'étend */}
+              {isAnimating && (
+                <View style={[StyleSheet.absoluteFill, { overflow: 'hidden', zIndex: 9999 }]} pointerEvents="none">
+                  <Animated.View style={[styles.ripple, animatedStyle]} />
+                </View>
+              )}
+              {/* 
+                    
+                */}
+            </View>
+          </NavigationContext.Provider>
+        </ThemeContext.Provider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 

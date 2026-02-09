@@ -1,7 +1,8 @@
 import * as Location from 'expo-location';
 import { MapPin, Navigation } from 'lucide-react-native';
 import { useContext, useState } from 'react';
-import { Alert, Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { OnboardingDots } from '../components/OnboardingDots';
 import { NavigationContext } from './NavigationContext';
 

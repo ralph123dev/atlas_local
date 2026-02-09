@@ -1,7 +1,8 @@
 
 import { Package, Search, Star } from 'lucide-react-native';
 import React, { useContext } from 'react';
-import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { OnboardingButton } from '../components/OnboardingButton';
 import { OnboardingDots } from '../components/OnboardingDots';
 import { styles } from '../constants/styles/Intro.styles';

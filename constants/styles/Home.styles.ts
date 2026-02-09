@@ -416,4 +416,132 @@ export const styles = StyleSheet.create({
     categoryBtnTextActive: {
         color: '#fff',
     },
+    carouselContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 10,
+         marginTop: -300,
+    },
+    imageCard: {
+        width: '100%',
+        backgroundColor: 'transparent',
+        alignItems: 'center',
+    },
+    blackFrame: {
+        width: '100%',
+        aspectRatio: 16 / 9,
+        backgroundColor: '#000',
+        borderRadius: 20,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#374151',
+    },
+    fullImage: {
+        width: '100%',
+        height: '100%',
+    },
+    cardInfo: {
+        marginTop: 15,
+        alignItems: 'center',
+        width: '100%',
+    },
+    cardTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 6,
+        textAlign: 'center',
+    },
+    cardDistance: {
+        fontSize: 16,
+        marginBottom: 25,
+        textAlign: 'center',
+        opacity: 0.8,
+    },
+    carouselControls: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        paddingHorizontal: 30,
+        marginTop: 10,
+    },
+    chevronBtn: {
+        padding: 10,
+    },
+    paginationDots: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    dot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginHorizontal: 4,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cardsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        paddingHorizontal: 5,
+        marginBottom: 10,
+    },
+    twinCard: {
+        width: '48%',
+        backgroundColor: 'transparent',
+    },
+    twinBlackFrame: {
+        width: '100%',
+        aspectRatio: 1, // Square or slightly portrait as per drawing
+        backgroundColor: '#000',
+        borderRadius: 15,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#374151',
+    },
+    twinCardInfo: {
+        marginTop: 10,
+        paddingHorizontal: 4,
+    },
+    twinCardTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 2,
+    },
+    twinCardSub: {
+        fontSize: 12,
+        marginBottom: 2,
+    },
+    twinCardDistance: {
+        fontSize: 11,
+        opacity: 0.7,
+    },
+    seeAllTrendingBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f3f4f6',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 25,
+        marginTop: 15,
+        width: '100%',
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+    },
+    seeAllTrendingText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#6b7280',
+        marginRight: 6,
+    },
+    emptyText: {
+        fontSize: 16,
+        textAlign: 'center',
+    },
 });
