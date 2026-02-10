@@ -90,7 +90,7 @@ export default function AskScreen() {
             };
             setMessages([...messages, newMessage]);
 
-            // Simulation d'une réponse de l'IA (bot) après un délai de 1 seconde
+            // Simulation d'une réponse de l'IA après un délai de 1 seconde
             setTimeout(() => {
                 const botResponse: Message = {
                     id: (Date.now() + 1).toString(),
