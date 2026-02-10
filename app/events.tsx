@@ -150,7 +150,7 @@ export default function EventsScreen() {
         </TouchableOpacity>
     );
 
-    const types = ['Tous', 'Musique', 'Culture', 'Sport', 'Général', 'Pro'];
+    const types = ['Tous', 'Musique', 'Culture', 'Sport', 'Général', 'Pro', 'Festivals'];
 
     return (
         <SafeAreaView style={[styles.container, themeStyles.container]}>
