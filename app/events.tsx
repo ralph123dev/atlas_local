@@ -3,7 +3,7 @@ import React, { useContext, useRef, useState } from 'react';
 import { Alert, Dimensions, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SideMenu } from '../components/SideMenu';
 import { styles } from '../constants/styles/Events.styles';
@@ -67,6 +67,7 @@ export default function EventsScreen() {
     const { theme } = useContext(ThemeContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [likedEvents, setLikedEvents] = useState<string[]>([]);
+    const [isSheetVisible, setIsSheetVisible] = useState(false);
 
     const [events, setEvents] = useState<Event[]>(MOCK_EVENTS);
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
@@ -80,8 +81,22 @@ export default function EventsScreen() {
     const [is3D, setIs3D] = useState(false);
 
     // BottomSheet Logic
-    const translateY = useSharedValue(SCREEN_HEIGHT - SHEET_MIN_HEIGHT);
+    const translateY = useSharedValue(SCREEN_HEIGHT); // Start fully hidden
     const context = useSharedValue({ y: 0 });
+
+    const hideSheet = () => {
+        setIsSheetVisible(false);
+    };
+
+    const toggleSheet = () => {
+        if (isSheetVisible) {
+            translateY.value = withSpring(SCREEN_HEIGHT, { damping: 20, stiffness: 100 });
+            setIsSheetVisible(false);
+        } else {
+            setIsSheetVisible(true);
+            translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 20, stiffness: 100 });
+        }
+    };
 
     const panGesture = Gesture.Pan()
         .onStart(() => {
@@ -89,20 +104,23 @@ export default function EventsScreen() {
         })
         .onUpdate((event) => {
             let nextValue = context.value.y + event.translationY;
-            // Clamping
+            // Clamp top
             if (nextValue < SCREEN_HEIGHT - SHEET_MAX_HEIGHT) {
                 nextValue = SCREEN_HEIGHT - SHEET_MAX_HEIGHT;
             }
-            if (nextValue > SCREEN_HEIGHT - SHEET_MIN_HEIGHT) {
-                nextValue = SCREEN_HEIGHT - SHEET_MIN_HEIGHT;
+            // Allow dragging below to dismiss
+            if (nextValue > SCREEN_HEIGHT) {
+                nextValue = SCREEN_HEIGHT;
             }
             translateY.value = nextValue;
         })
         .onEnd((event) => {
-            if (event.velocityY < -500 || translateY.value < SCREEN_HEIGHT - (SHEET_MAX_HEIGHT + SHEET_MIN_HEIGHT) / 2) {
-                translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 20, stiffness: 100 });
+            // If swiping down fast or dragged past midpoint, dismiss completely
+            if (event.velocityY > 500 || translateY.value > SCREEN_HEIGHT - SHEET_MAX_HEIGHT / 2) {
+                translateY.value = withSpring(SCREEN_HEIGHT, { damping: 20, stiffness: 100 });
+                runOnJS(hideSheet)();
             } else {
-                translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MIN_HEIGHT, { damping: 20, stiffness: 100 });
+                translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 20, stiffness: 100 });
             }
         });
 
@@ -213,6 +231,9 @@ export default function EventsScreen() {
 
     const handleTypeSelect = (type: string) => {
         setSelectedType(type);
+        if (!isSheetVisible) {
+            setIsSheetVisible(true);
+        }
         translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 25, stiffness: 150 });
     };
 
@@ -330,6 +351,8 @@ export default function EventsScreen() {
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
+
+
                     </View>
 
                     {/* Map Controls */}
@@ -344,7 +367,7 @@ export default function EventsScreen() {
                 </View>
 
                 {/* Bottom Sheet for Events */}
-                <Animated.View style={[styles.bottomSheet, themeStyles.modalBg, animatedSheetStyle]}>
+                {isSheetVisible && <Animated.View style={[styles.bottomSheet, themeStyles.modalBg, animatedSheetStyle]}>
                     <GestureDetector gesture={panGesture}>
                         <View style={{ backgroundColor: 'transparent' }}>
                             <View style={styles.sheetHandleContainer}><View style={styles.sheetHandle} /></View>
@@ -429,7 +452,7 @@ export default function EventsScreen() {
                             </View>
                         )}
                     </ScrollView>
-                </Animated.View>
+                </Animated.View>}
 
                 {/* Bottom Navigation */}
                 <View style={[styles.bottomNav, { height: 90, paddingBottom: 30 }]}>

@@ -6,7 +6,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { ContributeScreen } from '../components/ContributeScreen';
@@ -61,8 +61,23 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState('explorer');
 
   // BottomSheet Logic
-  const translateY = useSharedValue(SCREEN_HEIGHT - SHEET_MIN_HEIGHT);
+  const translateY = useSharedValue(SCREEN_HEIGHT); // Start fully hidden
   const context = useSharedValue({ y: 0 });
+  const [isSheetVisible, setIsSheetVisible] = useState(false);
+
+  const hideSheet = () => {
+    setIsSheetVisible(false);
+  };
+
+  const toggleSheet = () => {
+    if (isSheetVisible) {
+      translateY.value = withSpring(SCREEN_HEIGHT, { damping: 20, stiffness: 100 });
+      setIsSheetVisible(false);
+    } else {
+      setIsSheetVisible(true);
+      translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 20, stiffness: 100 });
+    }
+  };
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -70,19 +85,23 @@ export default function HomeScreen() {
     })
     .onUpdate((event) => {
       let nextValue = context.value.y + event.translationY;
+      // Clamp top
       if (nextValue < SCREEN_HEIGHT - SHEET_MAX_HEIGHT) {
-        nextValue = SCREEN_HEIGHT - SHEET_MAX_HEIGHT - (SCREEN_HEIGHT - SHEET_MAX_HEIGHT - nextValue) * 0.2;
+        nextValue = SCREEN_HEIGHT - SHEET_MAX_HEIGHT;
       }
-      if (nextValue > SCREEN_HEIGHT - 40) {
-        nextValue = SCREEN_HEIGHT - 40 + (nextValue - (SCREEN_HEIGHT - 40)) * 0.2;
+      // Allow dragging below to dismiss
+      if (nextValue > SCREEN_HEIGHT) {
+        nextValue = SCREEN_HEIGHT;
       }
       translateY.value = nextValue;
     })
     .onEnd((event) => {
-      if (event.velocityY < -500 || translateY.value < SCREEN_HEIGHT - SHEET_MAX_HEIGHT / 2) {
-        translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 25, stiffness: 150 });
+      // If swiping down fast or dragged past midpoint, dismiss completely
+      if (event.velocityY > 500 || translateY.value > SCREEN_HEIGHT - SHEET_MAX_HEIGHT / 2) {
+        translateY.value = withSpring(SCREEN_HEIGHT, { damping: 20, stiffness: 100 });
+        runOnJS(hideSheet)();
       } else {
-        translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MIN_HEIGHT, { damping: 25, stiffness: 150 });
+        translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 25, stiffness: 150 });
       }
     });
 
@@ -174,6 +193,9 @@ export default function HomeScreen() {
     else placesToShow = [...categories_data.hotels, ...categories_data.restaurants];
 
     setSelectedPlaces(placesToShow);
+    if (!isSheetVisible) {
+      setIsSheetVisible(true);
+    }
     translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 25, stiffness: 150 });
   };
 
@@ -441,6 +463,8 @@ export default function HomeScreen() {
                   </TouchableOpacity>
                 ))}
               </ScrollView>
+
+
             </View>
 
             {/* Map Controls */}
@@ -545,7 +569,7 @@ export default function HomeScreen() {
       </SafeAreaView>
 
       {/* Persistent Bottom Sheet Explorer Overlay */}
-      {activeTab === 'explorer' && (
+      {activeTab === 'explorer' && isSheetVisible && (
         <Animated.View style={[
           styles.bottomSheet,
           themeStyles.card,
