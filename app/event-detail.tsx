@@ -103,7 +103,7 @@ export default function EventDetailScreen() {
                     <Text style={[styles.title, themeStyles.text]}>{event.name}</Text>
 
                     <View style={styles.infoRow}>
-                        <Calendar size={20} color="#0057b7" />
+                        <Calendar size={20} color="#85919eff" />
                         <Text style={[styles.infoText, themeStyles.text]}>
                             {event.startDate} {event.endDate ? `- ${event.endDate}` : ''}
                         </Text>

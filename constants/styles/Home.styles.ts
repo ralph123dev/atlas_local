@@ -200,7 +200,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 70,
-        marginTop: -190, // ajusté pour placer l'icône GPS un peu plus bas au-dessus de l'icône 3D
+        marginTop: -40, // ajusté pour placer l'icône GPS un peu plus bas au-dessus de l'icône 3D
     },
     placeMarkerContainer: {
         padding: 2,

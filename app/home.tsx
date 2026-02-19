@@ -1,5 +1,5 @@
 import * as ExpoLocation from 'expo-location';
-import { ChevronRight, Cloud, Coffee, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Search, Trees, User, Utensils, X } from 'lucide-react-native';
+import { ArrowLeft, Bookmark, ChevronRight, Cloud, Coffee, Flag, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Navigation, Phone, Search, Share2, Trees, User, Utensils, X } from 'lucide-react-native';
 
 
 import React, { useContext, useEffect, useState } from 'react';
@@ -59,6 +59,9 @@ export default function HomeScreen() {
   const router = useContext(NavigationContext);
   const { theme } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState('explorer');
+
+  // Selected Item State
+  const [selectedItem, setSelectedItem] = useState<any>(null);
 
   // BottomSheet Logic
   const translateY = useSharedValue(SCREEN_HEIGHT); // Start fully hidden
@@ -136,6 +139,7 @@ export default function HomeScreen() {
   const [isStreetViewVisible, setIsStreetViewVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'hotels' | 'restaurants' | 'supermarkets' | 'banks'>('all');
   const [selectedPlaces, setSelectedPlaces] = useState<any[]>([]);
+  const [isWebMapVisible, setIsWebMapVisible] = useState(false);
   const GOOGLE_API_KEY = "AIzaSyAOAGJB7TlVNo01s0-zVx_ObVRCkivqaNs";
 
   useEffect(() => {
@@ -193,6 +197,7 @@ export default function HomeScreen() {
     else placesToShow = [...categories_data.hotels, ...categories_data.restaurants];
 
     setSelectedPlaces(placesToShow);
+    setSelectedItem(null); // Reset selected item when opening category
     if (!isSheetVisible) {
       setIsSheetVisible(true);
     }
@@ -361,60 +366,68 @@ export default function HomeScreen() {
                 <Text style={[styles.loadingText, themeStyles.text]}>Chargement de la carte...</Text>
               </View>
             )}
-            <MapView
-              ref={mapRef}
-              provider={PROVIDER_GOOGLE}
-              style={{ flex: 1 }}
-              region={region}
-              showsUserLocation={true}
-              showsMyLocationButton={false}
-              showsPointsOfInterest={true}
-              showsCompass={false}
-              showsBuildings={true}
-              showsIndoors={true}
-              customMapStyle={isDark ? darkMapStyle : []}
-              userInterfaceStyle={isDark ? 'dark' : 'light'}
-              onMapReady={() => setIsMapLoading(false)}
-            >
-              {searchLocation && (
-                <Marker
-                  coordinate={searchLocation}
-                  title={searchText}
-                  pinColor="#0057b7"
-                  onPress={() => openStreetView(searchLocation.latitude, searchLocation.longitude)}
-                />
-              )}
+            {isWebMapVisible ? (
+              <WebView
+                source={{ uri: "https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1016691.1969907951!2d10.38!3d5.5!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2scm!4v1771113849339!5m2!1sfr!2scm" }}
+                style={{ flex: 1 }}
+                originWhitelist={['*']}
+              />
+            ) : (
+              <MapView
+                ref={mapRef}
+                provider={PROVIDER_GOOGLE}
+                style={{ flex: 1 }}
+                region={region}
+                showsUserLocation={true}
+                showsMyLocationButton={false}
+                showsPointsOfInterest={true}
+                showsCompass={false}
+                showsBuildings={true}
+                showsIndoors={true}
+                customMapStyle={isDark ? darkMapStyle : []}
+                userInterfaceStyle={isDark ? 'dark' : 'light'}
+                onMapReady={() => setIsMapLoading(false)}
+              >
+                {searchLocation && (
+                  <Marker
+                    coordinate={searchLocation}
+                    title={searchText}
+                    pinColor="#0057b7"
+                    onPress={() => openStreetView(searchLocation.latitude, searchLocation.longitude)}
+                  />
+                )}
 
-              {places.map((place) => (
-                <Marker
-                  key={place.place_id}
-                  coordinate={{
-                    latitude: place.geometry.location.lat,
-                    longitude: place.geometry.location.lng,
-                  }}
-                  onPress={() => openStreetView(place.geometry.location.lat, place.geometry.location.lng)}
-                >
-                  <View style={styles.placeMarkerContainer}>
-                    {place.photos && place.photos.length > 0 ? (
-                      <Image
-                        source={{ uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference=${place.photos[0].photo_reference}&key=${GOOGLE_API_KEY}` }}
-                        style={styles.placeMarkerImage}
-                      />
-                    ) : (
-                      <View style={[styles.placeMarkerIcon, { backgroundColor: '#0057b7' }]}>
-                        <Utensils size={12} color="#fff" />
-                      </View>
-                    )}
-                  </View>
-                  <Callout>
-                    <View style={styles.calloutContainer}>
-                      <Text style={styles.calloutTitle}>{place.name}</Text>
-                      <Text style={styles.calloutSub}>Appuyez pour voir Street View</Text>
+                {places.map((place) => (
+                  <Marker
+                    key={place.place_id}
+                    coordinate={{
+                      latitude: place.geometry.location.lat,
+                      longitude: place.geometry.location.lng,
+                    }}
+                    onPress={() => openStreetView(place.geometry.location.lat, place.geometry.location.lng)}
+                  >
+                    <View style={styles.placeMarkerContainer}>
+                      {place.photos && place.photos.length > 0 ? (
+                        <Image
+                          source={{ uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference=${place.photos[0].photo_reference}&key=${GOOGLE_API_KEY}` }}
+                          style={styles.placeMarkerImage}
+                        />
+                      ) : (
+                        <View style={[styles.placeMarkerIcon, { backgroundColor: '#0057b7' }]}>
+                          <Utensils size={12} color="#fff" />
+                        </View>
+                      )}
                     </View>
-                  </Callout>
-                </Marker>
-              ))}
-            </MapView>
+                    <Callout>
+                      <View style={styles.calloutContainer}>
+                        <Text style={styles.calloutTitle}>{place.name}</Text>
+                        <Text style={styles.calloutSub}>Appuyez pour voir Street View</Text>
+                      </View>
+                    </Callout>
+                  </Marker>
+                ))}
+              </MapView>
+            )}
             {/* Floating Search Bar */}
             <View style={styles.floatingHeader}>
               <View style={[styles.floatingSearchContainer, themeStyles.searchContainer, styles.shadow]}>
@@ -481,6 +494,13 @@ export default function HomeScreen() {
                 onPress={handleRecenter}
               >
                 <LucideLocate size={22} color="#0057b7" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.mapControlButton, styles.shadow, { backgroundColor: isDark ? '#374151' : '#fff' }]}
+                onPress={() => setIsWebMapVisible(!isWebMapVisible)}
+              >
+                <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: '#0057b7', borderColor: isDark ? '#374151' : '#fff', borderWidth: 2 }} />
               </TouchableOpacity>
             </View>
 
@@ -603,7 +623,72 @@ export default function HomeScreen() {
             contentContainerStyle={{ paddingBottom: 150 }} // Space for BottomNav
             nestedScrollEnabled={true}
           >
-            {selectedPlaces.length > 0 ? (
+            {selectedItem ? (
+              <View style={{ padding: 20 }}>
+                {/* Header with Back Button */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+                  <TouchableOpacity onPress={() => setSelectedItem(null)} style={{ padding: 5, marginRight: 10 }}>
+                    <ArrowLeft size={24} color={themeStyles.text.color} />
+                  </TouchableOpacity>
+                  <Text style={[themeStyles.text, { fontSize: 20, fontWeight: 'bold', flex: 1 }]} numberOfLines={1}>
+                    {selectedItem.name}
+                  </Text>
+                </View>
+
+                {/* Main Image */}
+                <View style={[styles.twinBlackFrame, { width: '100%', height: 220, marginBottom: 20 }]}>
+                  <Image
+                    source={{ uri: selectedItem.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400' }}
+                    style={styles.fullImage}
+                    resizeMode="cover"
+                  />
+                </View>
+
+                {/* Info */}
+                <View style={{ marginBottom: 25 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                    <Text style={[themeStyles.text, { fontSize: 22, fontWeight: 'bold' }]}>{selectedItem.name}</Text>
+                    <Text style={[themeStyles.text, { fontSize: 18, fontWeight: '600', color: themeStyles.iconActive }]}>{selectedItem.price}</Text>
+                  </View>
+                  <Text style={[themeStyles.subText, { fontSize: 16 }]}>{selectedItem.distance}m • Yaoundé • 4.5 ★</Text>
+                </View>
+
+                {/* Action Buttons */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 5 }}>
+                  {[
+                    { label: 'Itinéraire', icon: Navigation },
+                    { label: 'Contacter', icon: Phone },
+                    { label: 'Partager', icon: Share2 },
+                    { label: 'Sauvegarder', icon: Bookmark },
+                    { label: 'Signaler', icon: Flag }
+                  ].map((action, index) => (
+                    <TouchableOpacity key={index} style={{ alignItems: 'center' }}>
+                      <View style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 25,
+                        backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginBottom: 8
+                      }}>
+                        <action.icon size={24} color={themeStyles.iconActive} />
+                      </View>
+                      <Text style={[themeStyles.subText, { fontSize: 11 }]}>{action.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Description Placeholder */}
+                <View style={{ marginTop: 25 }}>
+                  <Text style={[themeStyles.text, { fontSize: 18, fontWeight: '600', marginBottom: 10 }]}>À propos</Text>
+                  <Text style={[themeStyles.subText, { lineHeight: 22 }]}>
+                    Découvrez cet endroit magnifique situé au cœur de Yaoundé. Profitez d'un service exceptionnel et d'une ambiance inoubliable.
+                  </Text>
+                </View>
+
+              </View>
+            ) : selectedPlaces.length > 0 ? (
               <View style={[styles.carouselContainer, { marginTop: 0 }]}>
                 <ScrollView
                   horizontal
@@ -617,7 +702,11 @@ export default function HomeScreen() {
                     <View key={pageIdx} style={[styles.cardsRow, { width: SCREEN_WIDTH - 40 }]}>
                       {[selectedPlaces[pageIdx * 2], selectedPlaces[pageIdx * 2 + 1]].map((place, idx) => (
                         place && (
-                          <View key={place.id || idx} style={styles.twinCard}>
+                          <TouchableOpacity
+                            key={place.id || idx}
+                            style={styles.twinCard}
+                            onPress={() => setSelectedItem(place)}
+                          >
                             <View style={styles.twinBlackFrame}>
                               <Image
                                 source={{ uri: place.image }}
@@ -630,7 +719,7 @@ export default function HomeScreen() {
                               <Text style={[styles.twinCardSub, themeStyles.subText]}>Hôtel • 4.5 ★</Text>
                               <Text style={[styles.twinCardDistance, themeStyles.subText]}>{place.distance}m • Yaoundé</Text>
                             </View>
-                          </View>
+                          </TouchableOpacity>
                         )
                       ))}
                     </View>
@@ -650,7 +739,11 @@ export default function HomeScreen() {
                   <Text style={[themeStyles.subText, { marginBottom: 15, fontWeight: '600', fontSize: 16 }]}>Restaurants populaires</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 25 }} nestedScrollEnabled={true}>
                     {categories_data.restaurants.map((item) => (
-                      <TouchableOpacity key={item.id} style={{ marginRight: 20, width: 160 }}>
+                      <TouchableOpacity
+                        key={item.id}
+                        style={{ marginRight: 20, width: 160 }}
+                        onPress={() => setSelectedItem(item)}
+                      >
                         <View style={styles.twinBlackFrame}>
                           <Image source={{ uri: item.image }} style={styles.fullImage} />
                         </View>
@@ -664,7 +757,11 @@ export default function HomeScreen() {
                   <Text style={[themeStyles.subText, { marginBottom: 15, fontWeight: '600', fontSize: 16 }]}>Hôtels à proximité</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled={true}>
                     {categories_data.hotels.map((item) => (
-                      <TouchableOpacity key={item.id} style={{ marginRight: 20, width: 160 }}>
+                      <TouchableOpacity
+                        key={item.id}
+                        style={{ marginRight: 20, width: 160 }}
+                        onPress={() => setSelectedItem(item)}
+                      >
                         <View style={styles.twinBlackFrame}>
                           <Image source={{ uri: item.image }} style={styles.fullImage} />
                         </View>

@@ -1,6 +1,5 @@
 # Documentation du Projet : Nexora (Atlas Local)
 
-
 ## Technologies Utilisées
 - **Framework** : React Native avec Expo (Managed Workflow).
 - **Langage** : TypeScript pour un typage statique fort.
