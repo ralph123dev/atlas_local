@@ -594,7 +594,7 @@ export default function HomeScreen() {
           styles.bottomSheet,
           themeStyles.card,
           animatedSheetStyle,
-          { zIndex: 1500, bottom: 0 }
+          { zIndex: 1500, top: 0, height: SHEET_MAX_HEIGHT }
         ]}>
           {/* Grabber Area - Pull up/down here primarily */}
           <GestureDetector gesture={panGesture}>
@@ -620,7 +620,7 @@ export default function HomeScreen() {
           <ScrollView
             style={styles.sheetContent}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 150 }} // Space for BottomNav
+            contentContainerStyle={{ paddingBottom: 180 }} // Increased space for BottomNav and visibility
             nestedScrollEnabled={true}
           >
             {selectedItem ? (

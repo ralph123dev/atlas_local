@@ -1,3 +1,4 @@
+import * as ImagePicker from 'expo-image-picker';
 import { Award, BookOpen, Briefcase, Camera, Check, ChevronDown, Edit3, Globe, Heart, Home, Image as ImageIcon, Info, MapPin, MessageSquare, MoreVertical, Navigation, Phone, PlusCircle, Search, Send, Star, Trash2, Utensils, X, XCircle } from 'lucide-react-native';
 import React, { useContext, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -152,29 +153,38 @@ export const ContributeScreen = () => {
         }, 1500);
     };
 
-    const handleAddPhotoActionPress = () => {
-        Alert.alert(
-            "Autorisation",
-            "Nexora souhaite accéder à votre appareil photo pour prendre des photos des lieux.",
-            [
-                { text: "Refuser", style: "cancel" },
-                {
-                    text: "Accepter", onPress: () => {
-                        setIsAddPhotoVisible(true);
-                        setIsCameraActive(true);
-                        setCapturedPhoto(null);
-                        setPhotoComment('');
-                    }
-                }
-            ]
-        );
+    const handleAddPhotoActionPress = async () => {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert("Permission", "Nexora souhaite accéder à votre appareil photo pour prendre des photos des lieux.");
+            return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.8,
+        });
+
+        if (!result.canceled) {
+            setCapturedPhoto(result.assets[0].uri);
+            setIsAddPhotoVisible(true);
+            setIsCameraActive(false);
+            setPhotoComment('');
+        }
     };
 
-    const handleCapturePhoto = () => {
-        // Mock capture - use a random image from picsum
-        const mockPhoto = `https://picsum.photos/800/600?random=${Date.now()}`;
-        setCapturedPhoto(mockPhoto);
-        setIsCameraActive(false);
+    const handleCapturePhoto = async () => {
+        // This function is now used to re-trigger the camera if needed
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.8,
+        });
+
+        if (!result.canceled) {
+            setCapturedPhoto(result.assets[0].uri);
+        }
     };
 
     const handleSubmitPhoto = () => {
@@ -455,13 +465,39 @@ export const ContributeScreen = () => {
                             {/* Image du lieu */}
                             <View style={styles.inputGroup}>
                                 <Text style={[styles.label, themeStyles.text]}>Image du lieu</Text>
-                                <TouchableOpacity
-                                    style={[styles.imageUploadBtn, { backgroundColor: isDark ? '#374151' : '#f0f4f8', padding: 20, borderRadius: 12, alignItems: 'center', borderStyle: 'dashed', borderWidth: 1, borderColor: themeStyles.divider.backgroundColor }]}
-                                    onPress={() => setIsGalleryVisible(true)}
-                                >
-                                    <ImageIcon size={32} color={isDark ? '#60a5fa' : '#0057b7'} />
-                                    <Text style={[styles.imageUploadText, themeStyles.subText, { marginTop: 8 }]}>Ajouter une photo</Text>
-                                </TouchableOpacity>
+                                <View style={{ flexDirection: 'row', gap: 10 }}>
+                                    <TouchableOpacity
+                                        style={[styles.imageUploadBtn, { flex: 1, backgroundColor: isDark ? '#374151' : '#f0f4f8', borderStyle: 'dashed', borderWidth: 1, borderColor: themeStyles.divider.backgroundColor }]}
+                                        onPress={async () => {
+                                            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+                                            if (status === 'granted') {
+                                                const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [4, 3], quality: 0.7 });
+                                                if (!result.canceled) setPlaceData({ ...placeData, image: result.assets[0].uri });
+                                            }
+                                        }}
+                                    >
+                                        <Camera size={24} color={isDark ? '#60a5fa' : '#0057b7'} />
+                                        <Text style={[styles.imageUploadText, themeStyles.subText]}>Camera</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.imageUploadBtn, { flex: 1, backgroundColor: isDark ? '#374151' : '#f0f4f8', borderStyle: 'dashed', borderWidth: 1, borderColor: themeStyles.divider.backgroundColor }]}
+                                        onPress={async () => {
+                                            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                                            if (status === 'granted') {
+                                                const result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [4, 3], quality: 0.7 });
+                                                if (!result.canceled) setPlaceData({ ...placeData, image: result.assets[0].uri });
+                                            }
+                                        }}
+                                    >
+                                        <ImageIcon size={24} color={isDark ? '#60a5fa' : '#0057b7'} />
+                                        <Text style={[styles.imageUploadText, themeStyles.subText]}>Galerie</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                {placeData.image && (
+                                    <View style={{ marginTop: 10, height: 100, borderRadius: 12, overflow: 'hidden' }}>
+                                        <Image source={{ uri: placeData.image }} style={{ width: '100%', height: '100%' }} />
+                                    </View>
+                                )}
                             </View>
 
                             {/* Contact */}
@@ -652,12 +688,16 @@ export const ContributeScreen = () => {
                         </View>
 
                         {isCameraActive ? (
-                            <View style={{ flex: 1, backgroundColor: '#000', borderRadius: 12, justifyContent: 'flex-end', paddingBottom: 40, alignItems: 'center' }}>
-                                <Text style={{ color: '#fff', position: 'absolute', top: 20, textAlign: 'center' }}>Viseur de l'appareil photo</Text>
+                            <View style={{ flex: 1, backgroundColor: '#1a1a1a', borderRadius: 12, justifyContent: 'center', alignItems: 'center' }}>
+                                <Camera size={64} color={themeStyles.iconActive} />
+                                <Text style={[themeStyles.text, { marginTop: 20, fontSize: 18, fontWeight: '600' }]}>Appareil photo prêt</Text>
                                 <TouchableOpacity
-                                    style={{ width: 70, height: 70, borderRadius: 35, backgroundColor: '#fff', borderWidth: 5, borderColor: '#ccc' }}
+                                    style={[styles.publishButton, { backgroundColor: themeStyles.progressBarFill, paddingHorizontal: 40, marginTop: 30 }]}
                                     onPress={handleCapturePhoto}
-                                />
+                                >
+                                    <Camera size={20} color="#fff" />
+                                    <Text style={styles.publishButtonText}>Ouvrir l'appareil photo</Text>
+                                </TouchableOpacity>
                             </View>
                         ) : (
                             <ScrollView showsVerticalScrollIndicator={false}>
