@@ -1,7 +1,6 @@
 import * as ExpoLocation from 'expo-location';
 import { ArrowLeft, Bookmark, ChevronRight, Cloud, Coffee, Flag, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Navigation, Phone, Search, Share2, Trees, User, Utensils, X } from 'lucide-react-native';
 
-
 import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
