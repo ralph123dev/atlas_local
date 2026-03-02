@@ -49,3 +49,5 @@ Chaque écran utilise le `NavigationContext` pour naviguer vers d'autres routes 
 - **Clé API** : La clé API Google Maps est actuellement codée en dur dans `app/home.tsx`. Pour la production, elle devrait être déplacée dans un fichier de variables d'environnement (`.env`).
 - **Styles** : Les styles sont dynamiques et dépendent souvent de l'état `theme`. Utilisez toujours le `ThemeContext` pour adapter les couleurs des composants.
 - **Nettoyage** : Les en-têtes de fichiers redondants ont été supprimés et les commentaires traduits en français pour une meilleure lisibilité par l'équipe actuelle.
+
+#documenter par Ralph Développeur.
