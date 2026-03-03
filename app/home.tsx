@@ -2,7 +2,7 @@ import * as ExpoLocation from 'expo-location';
 import { ArrowLeft, Bookmark, ChevronRight, Cloud, Coffee, Flag, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Navigation, Phone, Search, Share2, Trees, User, Utensils, X } from 'lucide-react-native';
 
 import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, Image, Linking, Modal, Platform, ScrollView, Share, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -20,37 +20,22 @@ const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.8;
 
 const categories_data = {
   hotels: [
-    { id: 1, name: 'Hôtel Splendide', distance: 120, price: '45.000', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400' },
-    { id: 2, name: 'Auberge du Lac', distance: 450, price: '25.000', image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400' },
-    { id: 3, name: 'Plaza Hotel', distance: 800, price: '60.000', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400' },
-    { id: 4, name: 'Grand Horizon', distance: 1200, price: '35.000', image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400' },
-    { id: 5, name: 'Ocean View', distance: 1500, price: '50.000', image: 'https://images.unsplash.com/photo-1551882547-ff43c63efe8c?w=400' },
-    { id: 6, name: 'City Center Inn', distance: 2000, price: '20.000', image: 'https://images.unsplash.com/photo-1445013544690-d303e898435d?w=400' },
-    { id: 7, name: 'Royal Palace', distance: 2500, price: '85.000', image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400' },
-    { id: 8, name: 'Nomad Lodge', distance: 3000, price: '15.000', image: 'https://images.unsplash.com/photo-1495365200463-6c74768ec287?w=400' },
+    { id: 1, name: 'Hôtel Splendide', distance: 120, price: '45.000', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400', lat: 3.8480, lng: 11.5021, phone: '+237690123456' },
+    { id: 2, name: 'Auberge du Lac', distance: 450, price: '25.000', image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400', lat: 3.8580, lng: 11.5121, phone: '+237670123456' },
+    { id: 3, name: 'Plaza Hotel', distance: 800, price: '60.000', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400', lat: 3.8680, lng: 11.5221, phone: '+237650123456' },
+    { id: 4, name: 'Grand Horizon', distance: 1200, price: '35.000', image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400', lat: 3.8380, lng: 11.4921, phone: '+237680123456' },
+    { id: 5, name: 'Ocean View', distance: 1500, price: '50.000', image: 'https://images.unsplash.com/photo-1551882547-ff43c63efe8c?w=400', lat: 3.8280, lng: 11.4821, phone: '+237660123456' },
   ],
   restaurants: [
-    { id: 1, name: 'Chez Mamy', distance: 50, price: '5.000', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400' },
-    { id: 2, name: 'Le Gourmet', distance: 200, price: '12.000', image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400' },
-    { id: 3, name: 'Pasta Fina', distance: 400, price: '8.500', image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400' },
-    { id: 4, name: 'Grill Master', distance: 750, price: '10.000', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400' },
-    { id: 5, name: 'Sushi Zen', distance: 900, price: '15.000', image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400' },
-    { id: 6, name: 'Burger King', distance: 1100, price: '4.500', image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400' },
-    { id: 7, name: 'Vegan Delight', distance: 1300, price: '9.000', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400' },
-    { id: 8, name: 'Tacos Local', distance: 1600, price: '3.000', image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400' },
+    { id: 1, name: 'Chez Mamy', distance: 50, price: '5.000', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400', lat: 3.8490, lng: 11.5031, phone: '+237699999999' },
+    { id: 2, name: 'Le Gourmet', distance: 200, price: '12.000', image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400', lat: 3.8590, lng: 11.5131, phone: '+237688888888' },
+    { id: 3, name: 'Pasta Fina', distance: 400, price: '8.500', image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400', lat: 3.8690, lng: 11.5231, phone: '+237677777777' },
   ],
   supermarkets: [
-    { id: 1, name: 'Carrefour Market', distance: 300, price: 'Promo', image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=400' },
-    { id: 2, name: 'Super U', distance: 600, price: 'Fresh', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400' },
-    { id: 3, name: 'Casino', distance: 1000, price: 'Bio', image: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=400' },
-    { id: 4, name: 'Boulangerie Local', distance: 100, price: 'Pains', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400' },
-    { id: 5, name: 'Marché Central', distance: 1500, price: 'Vrac', image: 'https://images.unsplash.com/photo-1488459711612-071ef29946b9?w=400' },
+    { id: 1, name: 'Carrefour Market', distance: 300, price: 'Promo', image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=400', lat: 3.8470, lng: 11.5011, phone: '+237666666666' },
   ],
   banks: [
-    { id: 1, name: 'Société Générale', distance: 250, price: 'Banque', image: 'https://images.unsplash.com/photo-1541354451442-952c97f3f18e?w=400' },
-    { id: 2, name: 'Eco Bank', distance: 500, price: 'ATM', image: 'https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?w=400' },
-    { id: 3, name: 'UBA', distance: 900, price: 'Transfert', image: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=400' },
-    { id: 4, name: 'Afriland First Bank', distance: 1200, price: 'Crédit', image: 'https://images.unsplash.com/photo-1454165833767-131ef24896c3?w=400' },
+    { id: 1, name: 'Société Générale', distance: 250, price: 'Banque', image: 'https://images.unsplash.com/photo-1541354451442-952c97f3f18e?w=400', lat: 3.8460, lng: 11.5001, phone: '+237655555555' },
   ]
 };
 
@@ -139,6 +124,8 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'hotels' | 'restaurants' | 'supermarkets' | 'banks'>('all');
   const [selectedPlaces, setSelectedPlaces] = useState<any[]>([]);
   const [isWebMapVisible, setIsWebMapVisible] = useState(false);
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [reportReason, setReportReason] = useState('');
   const GOOGLE_API_KEY = "AIzaSyAOAGJB7TlVNo01s0-zVx_ObVRCkivqaNs";
 
   useEffect(() => {
@@ -240,6 +227,77 @@ export default function HomeScreen() {
       }, { duration: 1000 });
       setIs3D(!is3D);
     }
+  };
+
+  const handleAction = (label: string) => {
+    if (!selectedItem) return;
+
+    switch (label) {
+      case 'Itinéraire':
+        const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
+        const lat = selectedItem.lat || 3.8480;
+        const lng = selectedItem.lng || 11.5021;
+        const latLng = `${lat},${lng}`;
+        const labelStr = selectedItem.name;
+        const url = Platform.select({
+          ios: `${scheme}${labelStr}@${latLng}`,
+          android: `${scheme}${latLng}(${labelStr})`
+        });
+        if (url) {
+          Linking.canOpenURL(url).then(supported => {
+            if (supported) {
+              Linking.openURL(url);
+            } else {
+              const browserUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+              Linking.openURL(browserUrl);
+            }
+          });
+        }
+        break;
+      case 'Contacter':
+        Linking.openURL(`tel:${selectedItem.phone || '+237600000000'}`);
+        break;
+      case 'Partager':
+        Share.share({
+          message: `Découvrez ${selectedItem.name} sur Atlas Local ! Situé à Yaoundé.`,
+          title: selectedItem.name,
+        });
+        break;
+      case 'Sauvegarder':
+        Alert.alert(
+          'Enregistrement',
+          `Voulez-vous sauvegarder "${selectedItem.name}" dans vos enregistrements ?`,
+          [
+            { text: 'Annuler', style: 'cancel' },
+            {
+              text: 'Confirmer',
+              onPress: () => Alert.alert('Succès', 'Lieu sauvegardé avec succès !')
+            }
+          ]
+        );
+        break;
+      case 'Signaler':
+        setIsReportModalVisible(true);
+        break;
+    }
+  };
+
+  const submitReport = () => {
+    if (!reportReason.trim()) {
+      Alert.alert('Erreur', 'Veuillez saisir un motif de signalement.');
+      return;
+    }
+    // Simulation d'envoi
+    Alert.alert(
+      'Signalement envoyé',
+      'Merci de nous avoir aidés à améliorer le service. Notre équipe va examiner votre signalement.',
+      [{
+        text: 'OK', onPress: () => {
+          setIsReportModalVisible(false);
+          setReportReason('');
+        }
+      }]
+    );
   };
 
   const darkMapStyle = [
@@ -661,7 +719,11 @@ export default function HomeScreen() {
                     { label: 'Sauvegarder', icon: Bookmark },
                     { label: 'Signaler', icon: Flag }
                   ].map((action, index) => (
-                    <TouchableOpacity key={index} style={{ alignItems: 'center' }}>
+                    <TouchableOpacity
+                      key={index}
+                      style={{ alignItems: 'center' }}
+                      onPress={() => handleAction(action.label)}
+                    >
                       <View style={{
                         width: 50,
                         height: 50,
@@ -828,6 +890,58 @@ export default function HomeScreen() {
           <Text style={[styles.tabText, themeStyles.subText, activeTab === 'contribute' && [styles.activeTabText, themeStyles.activeTabText]]}>Contribute</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal de Signalement */}
+      <Modal
+        visible={isReportModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsReportModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: isDark ? '#1a1a1a' : '#fff' }]}>
+            <Text style={[styles.modalTitle, { color: themeStyles.text.color }]}>Signaler un lieu</Text>
+            <Text style={[themeStyles.subText, { marginBottom: 15 }]}>
+              Dites-nous pourquoi vous signalez "{selectedItem?.name}".
+            </Text>
+
+            <TextInput
+              style={[
+                styles.modalInput,
+                {
+                  color: themeStyles.text.color,
+                  borderColor: isDark ? '#374151' : '#e5e7eb',
+                  backgroundColor: isDark ? '#374151' : '#f9fafb'
+                }
+              ]}
+              placeholder="Ex: Informations erronées, lieu fermé, etc."
+              placeholderTextColor={isDark ? '#9ca3af' : '#6b7280'}
+              multiline
+              value={reportReason}
+              onChangeText={setReportReason}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton, { backgroundColor: isDark ? '#374151' : '#f3f4f6' }]}
+                onPress={() => {
+                  setIsReportModalVisible(false);
+                  setReportReason('');
+                }}
+              >
+                <Text style={[styles.buttonText, { color: themeStyles.text.color }]}>Annuler</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.submitButton]}
+                onPress={submitReport}
+              >
+                <Text style={[styles.buttonText, { color: '#fff' }]}>Envoyer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </GestureHandlerRootView>
   );
 }

@@ -461,5 +461,37 @@ export const styles = StyleSheet.create({
     },
     placeItemDesc: {
         fontSize: 13,
-    }
+    },
+    // Other Way Styles
+    otherWayHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        marginBottom: 10,
+    },
+    closeBtnOther: {
+        padding: 5,
+    },
+    otherWayMenu: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+        marginBottom: 20,
+    },
+    otherWayTab: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderBottomWidth: 2,
+        borderBottomColor: 'transparent',
+        gap: 4,
+    },
+    otherWayTabActive: {
+        borderBottomWidth: 2,
+    },
+    otherWayTabText: {
+        fontSize: 12,
+        fontWeight: '500',
+    },
 });

@@ -421,7 +421,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingVertical: 10,
-         marginTop: -300,
+        marginTop: -300,
     },
     imageCard: {
         width: '100%',
@@ -543,5 +543,60 @@ export const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         textAlign: 'center',
+    },
+    // Modal Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        width: '100%',
+        borderRadius: 20,
+        padding: 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 10,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    modalInput: {
+        borderWidth: 1,
+        borderRadius: 12,
+        padding: 15,
+        height: 120,
+        textAlignVertical: 'top',
+        fontSize: 16,
+        marginBottom: 20,
+        marginTop: 10,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginHorizontal: 5,
+    },
+    cancelButton: {
+        backgroundColor: '#f3f4f6',
+    },
+    submitButton: {
+        backgroundColor: '#0057b7',
+    },
+    buttonText: {
+        fontWeight: '700',
+        fontSize: 16,
     },
 });

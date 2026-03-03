@@ -1,8 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
-import { Award, BookOpen, Briefcase, Camera, Check, ChevronDown, Edit3, Globe, Heart, Home, Image as ImageIcon, Info, MapPin, MessageSquare, MoreVertical, Navigation, Phone, PlusCircle, Search, Send, Star, Trash2, Utensils, X, XCircle } from 'lucide-react-native';
+import { Award, BookOpen, Briefcase, Camera, Check, ChevronDown, Edit3, Globe, Heart, Home, Image as ImageIcon, Info, MapPin, MessageSquare, MoreVertical, Navigation, Phone, PlusCircle, Send, Star, Utensils, X } from 'lucide-react-native';
 import React, { useContext, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ThemeContext } from '../app/ThemeContext';
 import { styles } from '../constants/styles/Contribute.styles';
 
@@ -96,10 +95,39 @@ export const ContributeScreen = () => {
         { id: 5, name: 'Librairie des Arts', description: 'Une vaste collection de livres d\'art et de littérature classique.' }
     ];
 
-    // State for interactions
     const [isProposedPlaceOptionsVisible, setIsProposedPlaceOptionsVisible] = useState(false);
     const [isChangeProposedPlaceVisible, setIsChangeProposedPlaceVisible] = useState(false);
     const [proposedPlace, setProposedPlace] = useState(mockPlaces[0]);
+
+    // State for "Other Ways to Contribute"
+    const [isOtherWayVisible, setIsOtherWayVisible] = useState(false);
+    const [otherWayTab, setOtherWayTab] = useState('services');
+    const [otherWayData, setOtherWayData] = useState({
+        name: '',
+        address: '',
+        category: 'Sélectionner une catégorie',
+        eventDate: '',
+        eventTime: '',
+        website: '',
+        phone: '',
+        email: '',
+        file: null as string | null
+    });
+    const [isOtherCategoryPickerVisible, setIsOtherCategoryPickerVisible] = useState(false);
+
+    const otherCategories = [
+        { name: 'Restauration', icon: Utensils },
+        { name: 'Mode & Beauté', icon: Briefcase },
+        { name: 'Éducation', icon: BookOpen },
+        { name: 'Santé & Bien-être', icon: Heart },
+        { name: 'Loisirs & Parcs', icon: MapPin },
+        { name: 'Services Publics', icon: Home },
+        { name: 'Technologie', icon: Briefcase },
+        { name: 'Art & Culture', icon: Award },
+        { name: 'Finance & Banque', icon: Briefcase },
+        { name: 'Sport', icon: PlusCircle },
+        { name: 'Autre', icon: PlusCircle }
+    ];
 
     const isFormValid = placeData.name.trim() !== '' && placeData.category !== 'Sélectionner une catégorie';
     const isReviewValid = reviewData.placeName.trim() !== '' && reviewData.review.trim() !== '';
@@ -175,7 +203,6 @@ export const ContributeScreen = () => {
     };
 
     const handleCapturePhoto = async () => {
-        // This function is now used to re-trigger the camera if needed
         const result = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
             aspect: [4, 3],
@@ -269,7 +296,6 @@ export const ContributeScreen = () => {
 
                 {/* Horizontal Action Menu */}
                 <View style={styles.actionsContainer}>
-
                     <ScrollView
                         ref={scrollRef}
                         horizontal
@@ -293,7 +319,6 @@ export const ContributeScreen = () => {
                             </TouchableOpacity>
                         ))}
                     </ScrollView>
-
                 </View>
 
                 {/* Badge Challenge Section */}
@@ -311,14 +336,16 @@ export const ContributeScreen = () => {
                             style={styles.taskItem}
                             onPress={() => handleTaskPress(task.id)}
                         >
-                            <View style={styles.taskLeft}>
-                                <View style={[styles.taskIconCircle, { backgroundColor: isDark ? '#374151' : '#f0f4f8' }]}>
-                                    <task.icon size={18} color={isDark ? '#9ca3af' : '#5f6368'} />
-                                </View>
-                                <View style={styles.taskContent}>
-                                    <Text style={[styles.taskName, themeStyles.text]}>{task.title}</Text>
-                                    <View style={[styles.taskProgressBg, { backgroundColor: themeStyles.progressBarBg }]}>
-                                        <View style={[styles.taskProgressFill, { width: `${(task.current / task.target) * 100}%`, backgroundColor: themeStyles.progressBarFill }]} />
+                            <View style={task.id === 1 ? { opacity: 1 } : {}}>
+                                <View style={styles.taskLeft}>
+                                    <View style={[styles.taskIconCircle, { backgroundColor: isDark ? '#374151' : '#f0f4f8' }]}>
+                                        <task.icon size={18} color={isDark ? '#9ca3af' : '#5f6368'} />
+                                    </View>
+                                    <View style={styles.taskContent}>
+                                        <Text style={[styles.taskName, themeStyles.text]}>{task.title}</Text>
+                                        <View style={[styles.taskProgressBg, { backgroundColor: themeStyles.progressBarBg }]}>
+                                            <View style={[styles.taskProgressFill, { width: `${(task.current / task.target) * 100}%`, backgroundColor: themeStyles.progressBarFill }]} />
+                                        </View>
                                     </View>
                                 </View>
                             </View>
@@ -326,7 +353,10 @@ export const ContributeScreen = () => {
                         </TouchableOpacity>
                     ))}
 
-                    <TouchableOpacity style={[styles.moreActionsBtn, { borderTopColor: themeStyles.divider.backgroundColor }]}>
+                    <TouchableOpacity
+                        style={[styles.moreActionsBtn, { borderTopColor: themeStyles.divider.backgroundColor }]}
+                        onPress={() => setIsOtherWayVisible(true)}
+                    >
                         <PlusCircle size={20} color={themeStyles.progressBarFill} />
                         <Text style={[styles.moreActionsText, { color: themeStyles.progressBarFill }]}>Autres façons de contribuer</Text>
                     </TouchableOpacity>
@@ -398,7 +428,6 @@ export const ContributeScreen = () => {
                         </View>
 
                         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-                            {/* Nom du lieu */}
                             <View style={styles.inputGroup}>
                                 <Text style={[styles.label, themeStyles.text]}>Nom du lieu</Text>
                                 <TextInput
@@ -410,7 +439,6 @@ export const ContributeScreen = () => {
                                 />
                             </View>
 
-                            {/* Catégorie (Menu déroulant simulé) */}
                             <View style={styles.inputGroup}>
                                 <Text style={[styles.label, themeStyles.text]}>Catégorie</Text>
                                 <TouchableOpacity
@@ -424,7 +452,6 @@ export const ContributeScreen = () => {
                                 </TouchableOpacity>
                             </View>
 
-                            {/* Votre adresse */}
                             <View style={styles.inputGroup}>
                                 <Text style={[styles.label, themeStyles.text]}>Votre adresse</Text>
                                 <TextInput
@@ -434,103 +461,6 @@ export const ContributeScreen = () => {
                                     value={placeData.userAddress}
                                     onChangeText={(text) => setPlaceData({ ...placeData, userAddress: text })}
                                 />
-                            </View>
-
-                            {/* Carte */}
-                            <View style={styles.inputGroup}>
-                                <Text style={[styles.label, themeStyles.text]}>Localisation sur la carte</Text>
-                                <View style={[styles.mapPreviewContainer, { borderColor: themeStyles.divider.backgroundColor, height: 200, borderRadius: 12, overflow: 'hidden', marginVertical: 10 }]}>
-                                    <MapView
-                                        provider={PROVIDER_GOOGLE}
-                                        style={StyleSheet.absoluteFillObject}
-                                        initialRegion={{
-                                            latitude: 5.452391,
-                                            longitude: 10.0683,
-                                            latitudeDelta: 0.01,
-                                            longitudeDelta: 0.01,
-                                        }}
-                                        customMapStyle={isDark ? [
-                                            { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
-                                            { "elementType": "labels.text.fill", "stylers": [{ "color": "#746855" }] },
-                                            { "elementType": "labels.text.stroke", "stylers": [{ "color": "#242f3e" }] },
-                                            { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#17263c" }] }
-                                        ] : []}
-                                    />
-                                    <View style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -16, marginTop: -32 }}>
-                                        <MapPin size={32} color="#ea4335" />
-                                    </View>
-                                </View>
-                            </View>
-
-                            {/* Image du lieu */}
-                            <View style={styles.inputGroup}>
-                                <Text style={[styles.label, themeStyles.text]}>Image du lieu</Text>
-                                <View style={{ flexDirection: 'row', gap: 10 }}>
-                                    <TouchableOpacity
-                                        style={[styles.imageUploadBtn, { flex: 1, backgroundColor: isDark ? '#374151' : '#f0f4f8', borderStyle: 'dashed', borderWidth: 1, borderColor: themeStyles.divider.backgroundColor }]}
-                                        onPress={async () => {
-                                            const { status } = await ImagePicker.requestCameraPermissionsAsync();
-                                            if (status === 'granted') {
-                                                const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [4, 3], quality: 0.7 });
-                                                if (!result.canceled) setPlaceData({ ...placeData, image: result.assets[0].uri });
-                                            }
-                                        }}
-                                    >
-                                        <Camera size={24} color={isDark ? '#60a5fa' : '#0057b7'} />
-                                        <Text style={[styles.imageUploadText, themeStyles.subText]}>Camera</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[styles.imageUploadBtn, { flex: 1, backgroundColor: isDark ? '#374151' : '#f0f4f8', borderStyle: 'dashed', borderWidth: 1, borderColor: themeStyles.divider.backgroundColor }]}
-                                        onPress={async () => {
-                                            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-                                            if (status === 'granted') {
-                                                const result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [4, 3], quality: 0.7 });
-                                                if (!result.canceled) setPlaceData({ ...placeData, image: result.assets[0].uri });
-                                            }
-                                        }}
-                                    >
-                                        <ImageIcon size={24} color={isDark ? '#60a5fa' : '#0057b7'} />
-                                        <Text style={[styles.imageUploadText, themeStyles.subText]}>Galerie</Text>
-                                    </TouchableOpacity>
-                                </View>
-                                {placeData.image && (
-                                    <View style={{ marginTop: 10, height: 100, borderRadius: 12, overflow: 'hidden' }}>
-                                        <Image source={{ uri: placeData.image }} style={{ width: '100%', height: '100%' }} />
-                                    </View>
-                                )}
-                            </View>
-
-                            {/* Contact */}
-                            <View style={styles.inputGroup}>
-                                <View style={{ flexDirection: 'row', gap: 10 }}>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={[styles.label, themeStyles.text]}>Téléphone</Text>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, height: 45, borderColor: themeStyles.divider.backgroundColor }}>
-                                            <Phone size={18} color={isDark ? '#9ca3af' : '#5f6368'} />
-                                            <TextInput
-                                                style={{ flex: 1, marginLeft: 8, color: themeStyles.text.color }}
-                                                placeholder="+33..."
-                                                placeholderTextColor={themeStyles.subText.color}
-                                                keyboardType="phone-pad"
-                                                value={placeData.phone}
-                                                onChangeText={(text) => setPlaceData({ ...placeData, phone: text })}
-                                            />
-                                        </View>
-                                    </View>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={[styles.label, themeStyles.text]}>Site Web</Text>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, height: 45, borderColor: themeStyles.divider.backgroundColor }}>
-                                            <Globe size={18} color={isDark ? '#9ca3af' : '#5f6368'} />
-                                            <TextInput
-                                                style={{ flex: 1, marginLeft: 8, color: themeStyles.text.color }}
-                                                placeholder="www..."
-                                                placeholderTextColor={themeStyles.subText.color}
-                                                value={placeData.website}
-                                                onChangeText={(text) => setPlaceData({ ...placeData, website: text })}
-                                            />
-                                        </View>
-                                    </View>
-                                </View>
                             </View>
 
                             <TouchableOpacity
@@ -543,40 +473,6 @@ export const ContributeScreen = () => {
                             >
                                 {isPublishing ? <ActivityIndicator color="#fff" /> : <Text style={[styles.publishButtonText, { color: isFormValid ? '#fff' : themeStyles.subText.color }]}>Ajouter le lieu</Text>}
                             </TouchableOpacity>
-                        </ScrollView>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Picker de Catégories */}
-            <Modal
-                visible={isCategoryPickerVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setIsCategoryPickerVisible(false)}
-            >
-                <View style={[styles.popupOverlay, { backgroundColor: 'rgba(0,0,0,0.7)' }]}>
-                    <View style={[styles.popupContent, themeStyles.card, { maxHeight: '70%', width: '90%', alignItems: 'stretch' }]}>
-                        <View style={[styles.modalHeader, { marginBottom: 15 }]}>
-                            <Text style={[styles.popupTitle, themeStyles.text]}>Choisir une catégorie</Text>
-                            <TouchableOpacity onPress={() => setIsCategoryPickerVisible(false)}>
-                                <X size={20} color={themeStyles.subText.color} />
-                            </TouchableOpacity>
-                        </View>
-                        <ScrollView>
-                            {categories.map((cat) => (
-                                <TouchableOpacity
-                                    key={cat.name}
-                                    style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 10, borderBottomWidth: 1, borderBottomColor: themeStyles.divider.backgroundColor }}
-                                    onPress={() => handleSelectCategory(cat.name)}
-                                >
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                                        <cat.icon size={20} color={themeStyles.progressBarFill} />
-                                        <Text style={{ fontSize: 16, color: themeStyles.text.color }}>{cat.name}</Text>
-                                    </View>
-                                    {placeData.category === cat.name && <Check size={18} color={themeStyles.progressBarFill} />}
-                                </TouchableOpacity>
-                            ))}
                         </ScrollView>
                     </View>
                 </View>
@@ -597,9 +493,7 @@ export const ContributeScreen = () => {
                                 <X size={24} color={themeStyles.subText.color} />
                             </TouchableOpacity>
                         </View>
-
                         <ScrollView showsVerticalScrollIndicator={false}>
-                            {/* Nom du lieu */}
                             <View style={styles.inputGroup}>
                                 <Text style={[styles.label, themeStyles.text]}>Nom du lieu</Text>
                                 <TextInput
@@ -610,34 +504,6 @@ export const ContributeScreen = () => {
                                     onChangeText={(text) => setReviewData({ ...reviewData, placeName: text })}
                                 />
                             </View>
-
-                            {/* Carte */}
-                            <View style={styles.inputGroup}>
-                                <Text style={[styles.label, themeStyles.text]}>Localisation du lieu</Text>
-                                <View style={[styles.mapPreviewContainer, { borderColor: themeStyles.divider.backgroundColor, height: 180, borderRadius: 12, overflow: 'hidden', marginVertical: 10 }]}>
-                                    <MapView
-                                        provider={PROVIDER_GOOGLE}
-                                        style={StyleSheet.absoluteFillObject}
-                                        initialRegion={{
-                                            latitude: 5.452391,
-                                            longitude: 10.0683,
-                                            latitudeDelta: 0.01,
-                                            longitudeDelta: 0.01,
-                                        }}
-                                        customMapStyle={isDark ? [
-                                            { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
-                                            { "elementType": "labels.text.fill", "stylers": [{ "color": "#746855" }] },
-                                            { "elementType": "labels.text.stroke", "stylers": [{ "color": "#242f3e" }] },
-                                            { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#17263c" }] }
-                                        ] : []}
-                                    />
-                                    <View style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -16, marginTop: -32 }}>
-                                        <MapPin size={32} color="#ea4335" />
-                                    </View>
-                                </View>
-                            </View>
-
-                            {/* Avis */}
                             <View style={styles.inputGroup}>
                                 <Text style={[styles.label, themeStyles.text]}>Votre avis</Text>
                                 <TextInput
@@ -649,7 +515,6 @@ export const ContributeScreen = () => {
                                     onChangeText={(text) => setReviewData({ ...reviewData, review: text })}
                                 />
                             </View>
-
                             <TouchableOpacity
                                 style={[styles.publishButton, {
                                     backgroundColor: isReviewValid ? themeStyles.progressBarFill : themeStyles.progressBarBg,
@@ -659,218 +524,11 @@ export const ContributeScreen = () => {
                                 onPress={handleSubmitReview}
                                 disabled={!isReviewValid || isPublishing}
                             >
-                                {isPublishing ? <ActivityIndicator color="#fff" /> : (
-                                    <>
-                                        <Send size={20} color={isReviewValid ? "#fff" : themeStyles.subText.color} />
-                                        <Text style={[styles.publishButtonText, { color: isReviewValid ? '#fff' : themeStyles.subText.color }]}>Envoyer l'avis</Text>
-                                    </>
-                                )}
+                                {isPublishing ? <ActivityIndicator color="#fff" /> : <Text style={styles.publishButtonText}>Envoyer l'avis</Text>}
                             </TouchableOpacity>
                         </ScrollView>
                     </View>
                 </View>
-            </Modal>
-
-            {/* Modal Ajouter une photo (Appareil Photo) */}
-            <Modal
-                visible={isAddPhotoVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setIsAddPhotoVisible(false)}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={[styles.modalContent, themeStyles.card, { height: '90%' }]}>
-                        <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, themeStyles.text]}>{isCameraActive ? "Prendre une photo" : "Détails de la photo"}</Text>
-                            <TouchableOpacity onPress={() => setIsAddPhotoVisible(false)}>
-                                <X size={24} color={themeStyles.subText.color} />
-                            </TouchableOpacity>
-                        </View>
-
-                        {isCameraActive ? (
-                            <View style={{ flex: 1, backgroundColor: '#1a1a1a', borderRadius: 12, justifyContent: 'center', alignItems: 'center' }}>
-                                <Camera size={64} color={themeStyles.iconActive} />
-                                <Text style={[themeStyles.text, { marginTop: 20, fontSize: 18, fontWeight: '600' }]}>Appareil photo prêt</Text>
-                                <TouchableOpacity
-                                    style={[styles.publishButton, { backgroundColor: themeStyles.progressBarFill, paddingHorizontal: 40, marginTop: 30 }]}
-                                    onPress={handleCapturePhoto}
-                                >
-                                    <Camera size={20} color="#fff" />
-                                    <Text style={styles.publishButtonText}>Ouvrir l'appareil photo</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ) : (
-                            <ScrollView showsVerticalScrollIndicator={false}>
-                                {capturedPhoto && (
-                                    <View style={{ width: '100%', height: 300, borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
-                                        <Image source={{ uri: capturedPhoto }} style={{ width: '100%', height: '100%' }} />
-                                        <TouchableOpacity
-                                            style={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 20 }}
-                                            onPress={() => setIsCameraActive(true)}
-                                        >
-                                            <Trash2 size={20} color="#fff" />
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
-
-                                <View style={styles.inputGroup}>
-                                    <Text style={[styles.label, themeStyles.text]}>Commentaire</Text>
-                                    <TextInput
-                                        style={[styles.popupInput, { minHeight: 80, textAlignVertical: 'top', color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
-                                        placeholder="Décrivez ce qui se passe sur cette photo..."
-                                        placeholderTextColor={themeStyles.subText.color}
-                                        multiline
-                                        value={photoComment}
-                                        onChangeText={setPhotoComment}
-                                    />
-                                </View>
-
-                                <TouchableOpacity
-                                    style={[styles.publishButton, { backgroundColor: themeStyles.progressBarFill, marginTop: 20 }]}
-                                    onPress={handleSubmitPhoto}
-                                >
-                                    {isPublishing ? <ActivityIndicator color="#fff" /> : <Text style={styles.publishButtonText}>Poster la photo</Text>}
-                                </TouchableOpacity>
-                            </ScrollView>
-                        )}
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Simulated Gallery Modal */}
-            <Modal
-                visible={isGalleryVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setIsGalleryVisible(false)}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={[styles.modalContent, themeStyles.card]}>
-                        <View style={styles.modalHeader}>
-                            <Text style={[styles.modalTitle, themeStyles.text]}>Choisir une photo</Text>
-                            <TouchableOpacity onPress={() => setIsGalleryVisible(false)}>
-                                <X size={24} color={themeStyles.subText.color} />
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.galleryGrid}>
-                            {[1, 2, 3, 4, 5, 6].map((item) => (
-                                <TouchableOpacity
-                                    key={item}
-                                    style={[
-                                        styles.galleryItem,
-                                        selectedPhoto === `photo_${item}` && styles.galleryItemSelected
-                                    ]}
-                                    onPress={() => handlePhotoSelection(`photo_${item}`)}
-                                >
-                                    <Image
-                                        source={{ uri: `https://picsum.photos/200/200?random=${item}` }}
-                                        style={styles.galleryImage}
-                                    />
-                                    {selectedPhoto === `photo_${item}` && (
-                                        <View style={styles.checkOverlay}>
-                                            <Check size={16} color="#fff" />
-                                        </View>
-                                    )}
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        <TouchableOpacity
-                            style={[
-                                styles.publishButton,
-                                !selectedPhoto && styles.publishButtonDisabled,
-                                { backgroundColor: themeStyles.progressBarFill }
-                            ]}
-                            onPress={handlePublishPhoto}
-                            disabled={!selectedPhoto || isPublishing}
-                        >
-                            {isPublishing ? (
-                                <ActivityIndicator color="#fff" />
-                            ) : (
-                                <Text style={styles.publishButtonText}>Publier la photo</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Answer Questions Popup */}
-            <Modal
-                visible={isQuestionModalVisible}
-                animationType="fade"
-                transparent={true}
-                onRequestClose={closeQuestionModal}
-            >
-                <View style={styles.popupOverlay}>
-                    <View style={[styles.popupContent, themeStyles.card]}>
-                        <Text style={[styles.popupTitle, themeStyles.text]}>Aidez la communauté</Text>
-                        <Text style={[styles.popupSubtitle, themeStyles.subText]}>Connaissez-vous les horaires d'ouverture de "Chez Marcel" ?</Text>
-
-                        <TextInput
-                            style={[styles.popupInput, { color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
-                            placeholder="Votre réponse ici..."
-                            placeholderTextColor={themeStyles.subText.color}
-                            value={questionResponse}
-                            onChangeText={setQuestionResponse}
-                            multiline
-                        />
-
-                        <View style={styles.popupActions}>
-                            <TouchableOpacity
-                                style={[styles.popupButton, { backgroundColor: themeStyles.progressBarBg }]}
-                                onPress={closeQuestionModal}
-                            >
-                                <Text style={[styles.popupButtonText, themeStyles.text]}>Fermer</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.popupButton, { backgroundColor: themeStyles.progressBarFill, marginLeft: 10 }]}
-                                onPress={() => {
-                                    Alert.alert("Merci !", "Votre réponse a été enregistrée.");
-                                    closeQuestionModal();
-                                }}
-                            >
-                                <Text style={[styles.popupButtonText, { color: '#fff' }]}>Envoyer</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Options Modal for Proposed Place */}
-            <Modal
-                visible={isProposedPlaceOptionsVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setIsProposedPlaceOptionsVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlayTransparent}
-                    activeOpacity={1}
-                    onPress={() => setIsProposedPlaceOptionsVisible(false)}
-                >
-                    <View style={[styles.menuPopup, themeStyles.card]}>
-                        <TouchableOpacity style={styles.menuItem} onPress={handleIgnoreProposedPlace}>
-                            <Trash2 size={20} color={themeStyles.subText.color} />
-                            <Text style={[styles.menuItemText, themeStyles.text]}>Ignorer ce lieu</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.menuItem} onPress={() => setIsProposedPlaceOptionsVisible(false)}>
-                            <XCircle size={20} color={themeStyles.subText.color} />
-                            <Text style={[styles.menuItemText, themeStyles.text]}>Lieu non visité</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.menuItem} onPress={() => setIsProposedPlaceOptionsVisible(false)}>
-                            <Info size={20} color={themeStyles.subText.color} />
-                            <Text style={[styles.menuItemText, themeStyles.text]}>En savoir plus sur ce lieu</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.menuItem} onPress={() => {
-                            setIsProposedPlaceOptionsVisible(false);
-                            setIsChangeProposedPlaceVisible(true);
-                        }}>
-                            <Search size={20} color={themeStyles.subText.color} />
-                            <Text style={[styles.menuItemText, themeStyles.text]}>Rechercher un autre lieu</Text>
-                        </TouchableOpacity>
-                    </View>
-                </TouchableOpacity>
             </Modal>
 
             {/* Change Proposed Place Modal */}
@@ -908,8 +566,223 @@ export const ContributeScreen = () => {
                     </View>
                 </View>
             </Modal>
+
+            {/* Modal Autres façons de contribuer */}
+            <Modal
+                visible={isOtherWayVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setIsOtherWayVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={[styles.modalContent, themeStyles.card, { height: '95%' }]}>
+                        {/* Menu Horizontal en haut */}
+                        <View style={styles.otherWayHeader}>
+                            <TouchableOpacity onPress={() => setIsOtherWayVisible(false)} style={styles.closeBtnOther}>
+                                <X size={24} color={themeStyles.text.color} />
+                            </TouchableOpacity>
+                            <Text style={[styles.modalTitle, themeStyles.text, { flex: 1, textAlign: 'center' }]}>Contribuer</Text>
+                            <View style={{ width: 40 }} />
+                        </View>
+
+                        <View style={styles.otherWayMenu}>
+                            {[
+                                { id: 'services', label: 'Services', icon: Briefcase },
+                                { id: 'evenements', label: 'Événements', icon: Award },
+                                { id: 'signaler', label: 'Signaler', icon: Info },
+                                { id: 'partager', label: 'Partager', icon: Send }
+                            ].map((tab) => (
+                                <TouchableOpacity
+                                    key={tab.id}
+                                    style={[
+                                        styles.otherWayTab,
+                                        otherWayTab === tab.id && styles.otherWayTabActive,
+                                        otherWayTab === tab.id && { borderBottomColor: themeStyles.progressBarFill }
+                                    ]}
+                                    onPress={() => setOtherWayTab(tab.id)}
+                                >
+                                    <tab.icon size={18} color={otherWayTab === tab.id ? themeStyles.progressBarFill : themeStyles.subText.color} />
+                                    <Text style={[
+                                        styles.otherWayTabText,
+                                        { color: otherWayTab === tab.id ? themeStyles.progressBarFill : themeStyles.subText.color },
+                                        otherWayTab === tab.id && { fontWeight: 'bold' }
+                                    ]}>
+                                        {tab.label}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Nom du service</Text>
+                                <TextInput
+                                    style={[styles.popupInput, { minHeight: 45, color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
+                                    placeholder="ex: café du coin"
+                                    placeholderTextColor={themeStyles.subText.color}
+                                    value={otherWayData.name}
+                                    onChangeText={(text) => setOtherWayData({ ...otherWayData, name: text })}
+                                />
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Adresse</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, height: 45, borderColor: themeStyles.divider.backgroundColor }}>
+                                    <Text style={{ color: themeStyles.progressBarFill, fontWeight: 'bold', fontSize: 18 }}>@</Text>
+                                    <TextInput
+                                        style={{ flex: 1, marginLeft: 8, color: themeStyles.text.color }}
+                                        placeholder="Entrez l'adresse"
+                                        placeholderTextColor={themeStyles.subText.color}
+                                        value={otherWayData.address}
+                                        onChangeText={(text) => setOtherWayData({ ...otherWayData, address: text })}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Catégorie</Text>
+                                <TouchableOpacity
+                                    style={[styles.popupInput, { minHeight: 45, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderColor: themeStyles.divider.backgroundColor }]}
+                                    onPress={() => setIsOtherCategoryPickerVisible(true)}
+                                >
+                                    <Text style={{ color: otherWayData.category === 'Sélectionner une catégorie' ? themeStyles.subText.color : themeStyles.text.color }}>
+                                        {otherWayData.category}
+                                    </Text>
+                                    <ChevronDown size={20} color={themeStyles.subText.color} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Date et heure de l'événement</Text>
+                                <View style={{ flexDirection: 'row', gap: 10 }}>
+                                    <TextInput
+                                        style={[styles.popupInput, { flex: 1, minHeight: 45, color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
+                                        placeholder="JJ/MM/AAAA"
+                                        placeholderTextColor={themeStyles.subText.color}
+                                        value={otherWayData.eventDate}
+                                        onChangeText={(text) => setOtherWayData({ ...otherWayData, eventDate: text })}
+                                    />
+                                    <TextInput
+                                        style={[styles.popupInput, { flex: 1, minHeight: 45, color: themeStyles.text.color, borderColor: themeStyles.divider.backgroundColor }]}
+                                        placeholder="HH:MM"
+                                        placeholderTextColor={themeStyles.subText.color}
+                                        value={otherWayData.eventTime}
+                                        onChangeText={(text) => setOtherWayData({ ...otherWayData, eventTime: text })}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Moyens de contact</Text>
+                                <View style={{ gap: 10 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, height: 45, borderColor: themeStyles.divider.backgroundColor }}>
+                                        <Globe size={18} color={themeStyles.subText.color} />
+                                        <TextInput
+                                            style={{ flex: 1, marginLeft: 8, color: themeStyles.text.color }}
+                                            placeholder="Lien du site"
+                                            placeholderTextColor={themeStyles.subText.color}
+                                            value={otherWayData.website}
+                                            onChangeText={(text) => setOtherWayData({ ...otherWayData, website: text })}
+                                        />
+                                    </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, height: 45, borderColor: themeStyles.divider.backgroundColor }}>
+                                        <Phone size={18} color={themeStyles.subText.color} />
+                                        <TextInput
+                                            style={{ flex: 1, marginLeft: 8, color: themeStyles.text.color }}
+                                            placeholder="Numéro de tél"
+                                            placeholderTextColor={themeStyles.subText.color}
+                                            keyboardType="phone-pad"
+                                            value={otherWayData.phone}
+                                            onChangeText={(text) => setOtherWayData({ ...otherWayData, phone: text })}
+                                        />
+                                    </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, height: 45, borderColor: themeStyles.divider.backgroundColor }}>
+                                        <Send size={18} color={themeStyles.subText.color} />
+                                        <TextInput
+                                            style={{ flex: 1, marginLeft: 8, color: themeStyles.text.color }}
+                                            placeholder="Email"
+                                            placeholderTextColor={themeStyles.subText.color}
+                                            keyboardType="email-address"
+                                            value={otherWayData.email}
+                                            onChangeText={(text) => setOtherWayData({ ...otherWayData, email: text })}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={[styles.label, themeStyles.text]}>Ajouter une photo ou vidéo (optionnel)</Text>
+                                <TouchableOpacity
+                                    style={[styles.imageUploadBtn, { backgroundColor: isDark ? '#374151' : '#f0f4f8', borderColor: themeStyles.divider.backgroundColor }]}
+                                    onPress={async () => {
+                                        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                                        if (status === 'granted') {
+                                            const result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, mediaTypes: ImagePicker.MediaTypeOptions.All, quality: 0.7 });
+                                            if (!result.canceled) setOtherWayData({ ...otherWayData, file: result.assets[0].uri });
+                                        }
+                                    }}
+                                >
+                                    <ImageIcon size={32} color={themeStyles.progressBarFill} />
+                                    <Text style={[styles.imageUploadText, themeStyles.subText]}>Cliquer pour choisir un fichier</Text>
+                                </TouchableOpacity>
+                                {otherWayData.file && (
+                                    <View style={{ marginTop: 10, height: 150, borderRadius: 12, overflow: 'hidden' }}>
+                                        <Image source={{ uri: otherWayData.file }} style={{ width: '100%', height: '100%' }} />
+                                    </View>
+                                )}
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.publishButton, { backgroundColor: themeStyles.progressBarFill, marginTop: 30 }]}
+                                onPress={() => {
+                                    Alert.alert("Succès", "Votre contribution a été soumise avec succès !");
+                                    setIsOtherWayVisible(false);
+                                }}
+                            >
+                                <Text style={styles.publishButtonText}>Soumettre</Text>
+                            </TouchableOpacity>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Picker de Catégories pour "Autres façons" */}
+            <Modal
+                visible={isOtherCategoryPickerVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsOtherCategoryPickerVisible(false)}
+            >
+
+                <View style={[styles.popupOverlay, { backgroundColor: 'rgba(0,0,0,0.7)' }]}>
+                    <View style={[styles.popupContent, themeStyles.card, { maxHeight: '70%', width: '90%', alignItems: 'stretch' }]}>
+                        <View style={[styles.modalHeader, { marginBottom: 15 }]}>
+                            <Text style={[styles.popupTitle, themeStyles.text]}>Choisir une catégorie</Text>
+                            <TouchableOpacity onPress={() => setIsOtherCategoryPickerVisible(false)}>
+                                <X size={20} color={themeStyles.subText.color} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView>
+                            {otherCategories.map((cat) => (
+                                <TouchableOpacity
+                                    key={cat.name}
+                                    style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 10, borderBottomWidth: 1, borderBottomColor: themeStyles.divider.backgroundColor }}
+                                    onPress={() => {
+                                        setOtherWayData({ ...otherWayData, category: cat.name });
+                                        setIsOtherCategoryPickerVisible(false);
+                                    }}
+                                >
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                                        <cat.icon size={20} color={themeStyles.progressBarFill} />
+                                        <Text style={{ fontSize: 16, color: themeStyles.text.color }}>{cat.name}</Text>
+                                    </View>
+                                    {otherWayData.category === cat.name && <Check size={18} color={themeStyles.progressBarFill} />}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
-
-
