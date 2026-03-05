@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { Award, BookOpen, Briefcase, Camera, Check, ChevronDown, Edit3, Globe, Heart, Home, Image as ImageIcon, Info, MapPin, MessageSquare, MoreVertical, Navigation, Phone, PlusCircle, Send, Star, Utensils, X } from 'lucide-react-native';
+import { Award, BookOpen, Briefcase, Camera, Check, ChevronDown, ChevronRight, Edit3, Globe, Heart, Home, Image as ImageIcon, Info, MapPin, MessageSquare, MoreVertical, Navigation, Phone, PlusCircle, Send, Star, Utensils, X } from 'lucide-react-native';
 import React, { useContext, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ThemeContext } from '../app/ThemeContext';
@@ -322,13 +322,18 @@ export const ContributeScreen = () => {
                 </View>
 
                 {/* Badge Challenge Section */}
-                <View style={[styles.section, themeStyles.card]}>
+                <View style={[styles.section, themeStyles.card, styles.badgeCard]}>
                     <View style={styles.badgeHeader}>
-                        <Award size={24} color="#f59e0b" />
-                        <Text style={[styles.badgeTitle, themeStyles.text]}>Obtenez votre badge Nouveau contributeur</Text>
+                        <View style={styles.badgeIconBg}>
+                            <Award size={28} color="#f59e0b" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={[styles.badgeTitle, themeStyles.text]}>Obtenez votre badge</Text>
+                            <Text style={[styles.badgeSubtitle, themeStyles.subText]}>Nouveau contributeur</Text>
+                        </View>
                     </View>
 
-                    <View style={[styles.divider, themeStyles.divider]} />
+                    <View style={[styles.divider, themeStyles.divider, { marginVertical: 12 }]} />
 
                     {tasks.map((task) => (
                         <TouchableOpacity
@@ -336,20 +341,20 @@ export const ContributeScreen = () => {
                             style={styles.taskItem}
                             onPress={() => handleTaskPress(task.id)}
                         >
-                            <View style={task.id === 1 ? { opacity: 1 } : {}}>
-                                <View style={styles.taskLeft}>
-                                    <View style={[styles.taskIconCircle, { backgroundColor: isDark ? '#374151' : '#f0f4f8' }]}>
-                                        <task.icon size={18} color={isDark ? '#9ca3af' : '#5f6368'} />
-                                    </View>
-                                    <View style={styles.taskContent}>
+                            <View style={styles.taskLeft}>
+                                <View style={[styles.taskIconCircle, { backgroundColor: isDark ? '#374151' : '#f0f4f8' }]}>
+                                    <task.icon size={18} color={isDark ? '#9ca3af' : '#5f6368'} />
+                                </View>
+                                <View style={styles.taskContent}>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                                         <Text style={[styles.taskName, themeStyles.text]}>{task.title}</Text>
-                                        <View style={[styles.taskProgressBg, { backgroundColor: themeStyles.progressBarBg }]}>
-                                            <View style={[styles.taskProgressFill, { width: `${(task.current / task.target) * 100}%`, backgroundColor: themeStyles.progressBarFill }]} />
-                                        </View>
+                                        <Text style={[styles.taskStatus, themeStyles.subText]}>{task.current}/{task.target}</Text>
+                                    </View>
+                                    <View style={[styles.taskProgressBg, { backgroundColor: themeStyles.progressBarBg }]}>
+                                        <View style={[styles.taskProgressFill, { width: `${(task.current / task.target) * 100}%`, backgroundColor: themeStyles.progressBarFill }]} />
                                     </View>
                                 </View>
                             </View>
-                            <Text style={[styles.taskStatus, themeStyles.subText]}>{task.current}/{task.target}</Text>
                         </TouchableOpacity>
                     ))}
 
@@ -359,6 +364,7 @@ export const ContributeScreen = () => {
                     >
                         <PlusCircle size={20} color={themeStyles.progressBarFill} />
                         <Text style={[styles.moreActionsText, { color: themeStyles.progressBarFill }]}>Autres façons de contribuer</Text>
+                        <ChevronRight size={16} color={themeStyles.progressBarFill} style={{ marginLeft: 'auto' }} />
                     </TouchableOpacity>
                 </View>
 

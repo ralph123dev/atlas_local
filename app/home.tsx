@@ -2,7 +2,7 @@ import * as ExpoLocation from 'expo-location';
 import { ArrowLeft, Bookmark, ChevronRight, Cloud, Coffee, Flag, HeartHandshake, Hotel, House, LucideLocate, Map as MapLucideIcon, MessageCircleQuestion, Mic, Navigation, Phone, Search, Share2, Trees, User, Utensils, X } from 'lucide-react-native';
 
 import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Dimensions, Image, Linking, Modal, Platform, ScrollView, Share, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, Image, Linking, Modal, ScrollView, Share, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -229,29 +229,55 @@ export default function HomeScreen() {
     }
   };
 
+  const handleShareApp = () => {
+    Share.share({
+      message: 'Découvrez Atlas Local, votre compagnon de voyage à Yaoundé !',
+      title: 'Atlas Local',
+    });
+  };
+
+  const handleSeeAllTrending = () => {
+    const all = [
+      ...categories_data.hotels,
+      ...categories_data.restaurants,
+      ...categories_data.supermarkets,
+      ...categories_data.banks
+    ];
+    setSelectedPlaces(all);
+    if (!isSheetVisible) {
+      setIsSheetVisible(true);
+    }
+    translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, { damping: 25, stiffness: 150 });
+  };
+
   const handleAction = (label: string) => {
     if (!selectedItem) return;
 
     switch (label) {
       case 'Itinéraire':
-        const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
-        const lat = selectedItem.lat || 3.8480;
-        const lng = selectedItem.lng || 11.5021;
-        const latLng = `${lat},${lng}`;
-        const labelStr = selectedItem.name;
-        const url = Platform.select({
-          ios: `${scheme}${labelStr}@${latLng}`,
-          android: `${scheme}${latLng}(${labelStr})`
-        });
-        if (url) {
-          Linking.canOpenURL(url).then(supported => {
-            if (supported) {
-              Linking.openURL(url);
-            } else {
-              const browserUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-              Linking.openURL(browserUrl);
-            }
-          });
+        // Pick a random place from categories_data
+        const allPlaces = [
+          ...categories_data.hotels,
+          ...categories_data.restaurants,
+          ...categories_data.supermarkets,
+          ...categories_data.banks
+        ];
+        const randomPlace = allPlaces[Math.floor(Math.random() * allPlaces.length)];
+
+        // Ensure we are on explorer tab
+        setActiveTab('explorer');
+
+        // Update selected item and view
+        setSelectedItem(randomPlace);
+
+        // Animate map to random location
+        if (randomPlace.lat && randomPlace.lng) {
+          mapRef.current?.animateToRegion({
+            latitude: randomPlace.lat,
+            longitude: randomPlace.lng,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }, 1000);
         }
         break;
       case 'Contacter':
@@ -663,7 +689,9 @@ export default function HomeScreen() {
               {/* Weather Header */}
               <View style={[styles.sheetHeader, { borderBottomWidth: 0, marginBottom: 10 }]}>
                 <View>
-                  <Text style={[styles.sheetCityName, themeStyles.text]}>Yaoundé, Cameroun</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={[styles.sheetCityName, themeStyles.text]}>Yaoundé, Cameroun</Text>
+                  </View>
                 </View>
                 <View style={styles.weatherInfo}>
                   <Cloud size={24} color={isDark ? '#60a5fa' : '#0057b7'} />
@@ -764,7 +792,7 @@ export default function HomeScreen() {
                       {[selectedPlaces[pageIdx * 2], selectedPlaces[pageIdx * 2 + 1]].map((place, idx) => (
                         place && (
                           <TouchableOpacity
-                            key={place.id || idx}
+                            key={`${pageIdx}-${idx}-${place.id}-${place.name}`}
                             style={styles.twinCard}
                             onPress={() => setSelectedItem(place)}
                           >
@@ -775,10 +803,23 @@ export default function HomeScreen() {
                                 resizeMode="cover"
                               />
                             </View>
-                            <View style={styles.twinCardInfo}>
-                              <Text style={[styles.twinCardTitle, themeStyles.text]} numberOfLines={1}>{place.name}</Text>
-                              <Text style={[styles.twinCardSub, themeStyles.subText]}>Hôtel • 4.5 ★</Text>
-                              <Text style={[styles.twinCardDistance, themeStyles.subText]}>{place.distance}m • Yaoundé</Text>
+                            <View style={[styles.twinCardInfo, { flexDirection: 'row', alignItems: 'center' }]}>
+                              <View style={{ flex: 1 }}>
+                                <Text style={[styles.twinCardTitle, themeStyles.text]} numberOfLines={1}>{place.name}</Text>
+                                <Text style={[styles.twinCardSub, themeStyles.subText]}>Hôtel • 4.5 ★</Text>
+                                <Text style={[styles.twinCardDistance, themeStyles.subText]}>{place.distance}m • Yaoundé</Text>
+                              </View>
+                              <TouchableOpacity
+                                style={{ padding: 8 }}
+                                onPress={() => {
+                                  Share.share({
+                                    message: `Découvrez ${place.name} sur Atlas Local ! Situé à Yaoundé.`,
+                                    title: place.name,
+                                  });
+                                }}
+                              >
+                                <Share2 size={18} color={themeStyles.iconActive} />
+                              </TouchableOpacity>
                             </View>
                           </TouchableOpacity>
                         )
@@ -787,7 +828,10 @@ export default function HomeScreen() {
                   ))}
                 </ScrollView>
 
-                <TouchableOpacity style={styles.seeAllTrendingBtn}>
+                <TouchableOpacity
+                  style={styles.seeAllTrendingBtn}
+                  onPress={handleSeeAllTrending}
+                >
                   <Text style={styles.seeAllTrendingText}>See all trending</Text>
                   <ChevronRight size={16} color="#6b7280" />
                 </TouchableOpacity>
@@ -801,15 +845,30 @@ export default function HomeScreen() {
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 25 }} nestedScrollEnabled={true}>
                     {categories_data.restaurants.map((item) => (
                       <TouchableOpacity
-                        key={item.id}
+                        key={`restau-${item.id}-${item.name}`}
                         style={{ marginRight: 20, width: 160 }}
                         onPress={() => setSelectedItem(item)}
                       >
                         <View style={styles.twinBlackFrame}>
                           <Image source={{ uri: item.image }} style={styles.fullImage} />
                         </View>
-                        <Text style={[themeStyles.text, { fontWeight: 'bold', marginTop: 10, fontSize: 14 }]} numberOfLines={1}>{item.name}</Text>
-                        <Text style={[themeStyles.subText, { fontSize: 12, marginTop: 2 }]}>{item.distance}m • Yaoundé</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={[themeStyles.text, { fontWeight: 'bold', fontSize: 14 }]} numberOfLines={1}>{item.name}</Text>
+                            <Text style={[themeStyles.subText, { fontSize: 12, marginTop: 2 }]}>{item.distance}m • Yaoundé</Text>
+                          </View>
+                          <TouchableOpacity
+                            style={{ padding: 4 }}
+                            onPress={() => {
+                              Share.share({
+                                message: `Découvrez ${item.name} sur Atlas Local ! Situé à Yaoundé.`,
+                                title: item.name,
+                              });
+                            }}
+                          >
+                            <Share2 size={16} color={themeStyles.iconActive} />
+                          </TouchableOpacity>
+                        </View>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
@@ -819,15 +878,30 @@ export default function HomeScreen() {
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled={true}>
                     {categories_data.hotels.map((item) => (
                       <TouchableOpacity
-                        key={item.id}
+                        key={`hotel-${item.id}-${item.name}`}
                         style={{ marginRight: 20, width: 160 }}
                         onPress={() => setSelectedItem(item)}
                       >
                         <View style={styles.twinBlackFrame}>
                           <Image source={{ uri: item.image }} style={styles.fullImage} />
                         </View>
-                        <Text style={[themeStyles.text, { fontWeight: 'bold', marginTop: 10, fontSize: 14 }]} numberOfLines={1}>{item.name}</Text>
-                        <Text style={[themeStyles.subText, { fontSize: 12, marginTop: 2 }]}>{item.distance}m • Yaoundé</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={[themeStyles.text, { fontWeight: 'bold', fontSize: 14 }]} numberOfLines={1}>{item.name}</Text>
+                            <Text style={[themeStyles.subText, { fontSize: 12, marginTop: 2 }]}>{item.distance}m • Yaoundé</Text>
+                          </View>
+                          <TouchableOpacity
+                            style={{ padding: 4 }}
+                            onPress={() => {
+                              Share.share({
+                                message: `Découvrez ${item.name} sur Atlas Local ! Situé à Yaoundé.`,
+                                title: item.name,
+                              });
+                            }}
+                          >
+                            <Share2 size={16} color={themeStyles.iconActive} />
+                          </TouchableOpacity>
+                        </View>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
